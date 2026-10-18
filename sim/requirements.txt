@@ -1,0 +1,6 @@
+numpy>=1.24
+gymnasium>=0.29
+onnx>=1.14
+onnxruntime>=1.16
+mujoco>=3.0        # optional: 3-D model in models/solar_rover.xml
+pytest>=7

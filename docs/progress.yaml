@@ -1,0 +1,68 @@
+# Build progress for Solar Rover. This file drives the README's progress
+# tracker: edit a status here, then run
+#
+#   python3 tools/progress.py
+#
+# and it redraws docs/img/anim/progress.svg and roadmap.svg and the checklist
+# in README.md. CI fails if you forget (python3 tools/progress.py --check).
+#
+# status: done | next | todo     (one "next" at a time keeps the roadmap clear)
+
+phases:
+  - name: Design
+    icon: "✏️"
+    tasks:
+      - {task: "3D model of all 31 printed parts (OpenSCAD, 220 mm bed)", status: done}
+      - {task: "Pin-by-pin wiring and diagrams, no custom PCB", status: done}
+      - {task: "Parts list with prices (about $211)", status: done}
+      - {task: "Collision check of every part and arm move (fit_check.py)", status: done}
+
+  - name: Software
+    icon: "💾"
+    tasks:
+      - {task: "Car firmware: drive, arm, power, WiFi, BLE, ESP-NOW (compiles)", status: done}
+      - {task: "Handheld remote firmware (compiles)", status: done}
+      - {task: "Phone web app", status: done}
+      - {task: "Simulator and trained driving policy", status: done}
+      - {task: "Raspberry Pi agent with tests", status: done}
+      - {task: "PPO trainer run end to end", status: todo}
+
+  - name: Publish
+    icon: "🚀"
+    tasks:
+      - {task: "Rename to Solar Rover", status: done}
+      - {task: "Animated README and progress tracker", status: done}
+      - {task: "Create the GitHub repo and see CI go green", status: next}
+
+  - name: Parts
+    icon: "🛒"
+    tasks:
+      - {task: "Order the electronics and screws from bom.csv", status: todo}
+      - {task: "Print the fit-test parts and check the MEASURE values", status: todo}
+      - {task: "Print the remaining parts (PETG + TPU tires)", status: todo}
+
+  - name: Build
+    icon: "🔧"
+    tasks:
+      - {task: "Deck, motors, encoders and wheels", status: todo}
+      - {task: "Battery, charger and power tray", status: todo}
+      - {task: "Logic tray: ESP32, Pi, IMU", status: todo}
+      - {task: "Turret, arm and gripper", status: todo}
+      - {task: "Nose, camera and solar roof", status: todo}
+
+  - name: Bring-up
+    icon: "⚡"
+    tasks:
+      - {task: "First power-up and wheel direction check", status: todo}
+      - {task: "Servo calibration", status: todo}
+      - {task: "Charging check: wall, sun and temperature cut-off", status: todo}
+      - {task: "Handheld remote paired", status: todo}
+
+  - name: Autonomy
+    icon: "🤖"
+    tasks:
+      - {task: "Drive from the phone and the remote", status: todo}
+      - {task: "Agent drives on the Pi", status: todo}
+      - {task: "Tune the simulator from real runs and retrain", status: todo}
+      - {task: "Spot, drive to and pick up an object", status: todo}
+      - {task: "Find the sun and recharge on its own", status: todo}

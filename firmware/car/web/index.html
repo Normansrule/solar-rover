@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#1d2733">
+<title>Solar Rover</title>
+<style>
+:root{--bg:#141b23;--panel:#1d2733;--line:#2f3d4d;--text:#e8eef5;--muted:#93a4b6;--accent:#f2b705;--ok:#3fbf7f;--warn:#f2a33a;--bad:#e5484d;--blue:#4c8dff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:15px/1.35 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overscroll-behavior:none}
+body{display:flex;flex-direction:column;min-height:100%;user-select:none;-webkit-user-select:none}
+header{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--panel);border-bottom:1px solid var(--line)}
+header h1{font-size:17px;margin:0;font-weight:650;letter-spacing:.2px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--bad);flex:none}
+.dot.on{background:var(--ok)}
+#link{color:var(--muted);font-size:13px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+button{font:inherit;color:var(--text);background:#263445;border:1px solid var(--line);border-radius:10px;padding:9px 12px;touch-action:manipulation}
+button:active{background:#33465c}
+button.sel{background:var(--accent);color:#1b1b1b;border-color:var(--accent);font-weight:650}
+#stop{background:var(--bad);border-color:var(--bad);font-weight:750;letter-spacing:.5px;padding:9px 16px}
+main{flex:1;display:grid;gap:12px;padding:12px 14px;grid-template-columns:1fr}
+@media (min-width:760px){main{grid-template-columns:1fr 1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px}
+.card h2{font-size:13px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin:0 0 10px;font-weight:600}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row>button{flex:1}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:#17212c;border-radius:10px;padding:8px}
+.stat b{display:block;font-size:19px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.bar{height:8px;border-radius:4px;background:#2a3846;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--ok);width:0}
+.pads{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pad{position:relative;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#223041 0,#1a2531 70%);border:1px solid var(--line);touch-action:none}
+.pad .knob{position:absolute;left:50%;top:50%;width:34%;height:34%;margin:-17% 0 0 -17%;border-radius:50%;background:var(--blue);opacity:.9;box-shadow:0 2px 10px #0008;pointer-events:none}
+.pad.arm .knob{background:var(--accent)}
+.pad label{position:absolute;left:0;right:0;bottom:-22px;text-align:center;font-size:12px;color:var(--muted)}
+.padwrap{padding-bottom:22px}
+input{font:inherit;color:var(--text);background:#17212c;border:1px solid var(--line);border-radius:10px;padding:9px 10px;width:100%}
+.muted{color:var(--muted);font-size:13px}
+#warn{display:none;background:#4a2a12;border:1px solid var(--warn);color:#ffd9a8;border-radius:10px;padding:8px 10px;margin-bottom:10px}
+</style>
+</head>
+<body>
+<header>
+  <div class="dot" id="dot"></div>
+  <h1>Solar Rover</h1>
+  <div id="link">connecting...</div>
+  <button id="stop">STOP</button>
+</header>
+<main>
+  <section class="card">
+    <div id="warn"></div>
+    <h2>Drive and arm</h2>
+    <div class="pads">
+      <div class="padwrap"><div class="pad" id="padL"><div class="knob"></div><label>Drive</label></div></div>
+      <div class="padwrap"><div class="pad arm" id="padR"><div class="knob"></div><label id="armLabel">Arm: yaw / shoulder</label></div></div>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <button id="armAlt">Wrist / elbow</button>
+      <button id="grip">Open gripper</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button data-pose="park">Park</button><button data-pose="ready">Ready</button>
+      <button data-pose="pick">Pick</button><button data-pose="carry">Carry</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button id="slow" class="sel">Slow</button><button id="fast">Fast</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Who drives</h2>
+    <div class="row">
+      <button data-mode="manual">Manual</button>
+      <button data-mode="auto">Auto</button>
+      <button data-mode="agent">Agent</button>
+    </div>
+    <p class="muted">Auto: the agent drives, and any input from you takes over for 2 seconds. Driving now: <b id="driver">-</b></p>
+    <h2 style="margin-top:14px">Battery and solar</h2>
+    <div class="stats">
+      <div class="stat"><b id="pct">-</b><span>battery</span><div class="bar"><i id="pctbar"></i></div></div>
+      <div class="stat"><b id="volt">-</b><span>pack volts</span></div>
+      <div class="stat"><b id="chg">-</b><span>charging</span></div>
+      <div class="stat"><b id="sol">-</b><span>solar</span></div>
+      <div class="stat"><b id="cur">-</b><span>charge current</span></div>
+      <div class="stat"><b id="temp">-</b><span>pack temp</span></div>
+    </div>
+    <h2 style="margin-top:14px">Sensors</h2>
+    <div class="stats">
+      <div class="stat"><b id="tof">-</b><span>front distance</span></div>
+      <div class="stat"><b id="spd">-</b><span>speed</span></div>
+      <div class="stat"><b id="yawr">-</b><span>turn rate</span></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Connection</h2>
+    <div class="row">
+      <button id="bleBtn">Connect Bluetooth</button>
+      <button id="wsBtn">Connect WiFi</button>
+    </div>
+    <p class="muted" style="margin:8px 0 6px">WiFi address of the car (only needed when this page is not opened from the car itself):</p>
+    <input id="host" placeholder="solar-rover.local or 192.168.4.1">
+    <h2 style="margin-top:14px">Home WiFi for the car</h2>
+    <div class="row"><input id="ssid" placeholder="network name"><input id="pass" type="password" placeholder="password"></div>
+    <div class="row" style="margin-top:8px"><button id="saveWifi">Save and restart car</button><button id="pair">Pair a remote</button></div>
+    <p class="muted" id="reply"></p>
+  </section>
+</main>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const NUS = '6e400001-b5a3-f393-e0a9-e50e24dcca9e', NUS_RX = '6e400002-b5a3-f393-e0a9-e50e24dcca9e', NUS_TX = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
+  let ws = null, ble = null, bleBuf = '', connected = false;
+  let armAlt = false, gripOpen = false, fast = false;
+  const drive = {x: 0, y: 0, on: false}, armPad = {x: 0, y: 0, on: false};
+
+  function setLink(on, text) { connected = on; $('dot').classList.toggle('on', on); $('link').textContent = text; }
+
+  // ---------- transport ----------
+  function send(line) {
+    if (ws && ws.readyState === 1) ws.send(line);
+    else if (ble) ble.writeValueWithoutResponse(new TextEncoder().encode(line + '\n')).catch(() => {});
+  }
+  function connectWs(host) {
+    if (ws) try { ws.close(); } catch (e) {}
+    ws = new WebSocket('ws://' + host + '/ws');
+    setLink(false, 'connecting to ' + host + '...');
+    ws.onopen = () => setLink(true, 'WiFi: ' + host);
+    ws.onclose = () => { setLink(false, 'WiFi lost, retrying...'); setTimeout(() => connectWs(host), 1500); };
+    ws.onmessage = e => onLine(e.data);
+  }
+  async function connectBle() {
+    if (!navigator.bluetooth) { $('reply').textContent = 'This browser has no Web Bluetooth. Use Chrome on Android/desktop over https, or the Bluefruit Connect app (Controller > Control Pad).'; return; }
+    try {
+      const dev = await navigator.bluetooth.requestDevice({filters: [{services: [NUS]}]});
+      const srv = await dev.gatt.connect();
+      const svc = await srv.getPrimaryService(NUS);
+      ble = await svc.getCharacteristic(NUS_RX);
+      const tx = await svc.getCharacteristic(NUS_TX);
+      await tx.startNotifications();
+      tx.addEventListener('characteristicvaluechanged', ev => {
+        bleBuf += new TextDecoder().decode(ev.target.value);
+        let i; while ((i = bleBuf.indexOf('\n')) >= 0) { onLine(bleBuf.slice(0, i)); bleBuf = bleBuf.slice(i + 1); }
+      });
+      dev.addEventListener('gattserverdisconnected', () => { ble = null; setLink(false, 'Bluetooth disconnected'); });
+      setLink(true, 'Bluetooth: ' + (dev.name || 'SolarRover'));
+    } catch (e) { $('reply').textContent = 'Bluetooth: ' + e.message; }
+  }
+
+  // ---------- telemetry ----------
+  function onLine(line) {
+    if (!line || line[0] !== '{') { $('reply').textContent = line; return; }
+    let t; try { t = JSON.parse(line); } catch (e) { return; }
+    const pct = Math.round(t.bat_pct);
+    $('pct').textContent = pct + '%';
+    const bar = $('pctbar'); bar.style.width = pct + '%';
+    bar.style.background = pct < 15 ? 'var(--bad)' : pct < 30 ? 'var(--warn)' : 'var(--ok)';
+    $('volt').textContent = t.bat_v.toFixed(2) + ' V';
+    $('chg').textContent = t.chg;
+    $('sol').textContent = (t.sol_mw / 1000).toFixed(2) + ' W';
+    $('cur').textContent = Math.round(t.chg_ma) + ' mA';
+    $('temp').textContent = t.temp_c.toFixed(0) + ' °C';
+    $('tof').textContent = t.tof < 0 ? '-' : (t.tof / 10).toFixed(0) + ' cm';
+    const v = (t.spd[0] + t.spd[1] + t.spd[2] + t.spd[3]) / 4;
+    $('spd').textContent = (v / 1000).toFixed(2) + ' m/s';
+    $('yawr').textContent = t.imu[5].toFixed(0) + ' °/s';
+    $('driver').textContent = t.src + (t.ovr ? ' (you have control)' : '');
+    document.querySelectorAll('[data-mode]').forEach(b => b.classList.toggle('sel', b.dataset.mode === t.mode));
+    const w = $('warn');
+    if (t.crit) { w.style.display = 'block'; w.textContent = 'Battery critical: the car has parked and stopped. Put it in the sun or plug in the charger.'; }
+    else if (t.low) { w.style.display = 'block'; w.textContent = 'Battery low: in Auto/Agent mode the car will look for sun and park.'; }
+    else w.style.display = 'none';
+  }
+
+  // ---------- joysticks ----------
+  function pad(el, state) {
+    const knob = el.querySelector('.knob');
+    let id = null;
+    const move = e => {
+      const r = el.getBoundingClientRect(), R = r.width / 2;
+      let x = (e.clientX - r.left - R) / R, y = -(e.clientY - r.top - R) / R;
+      const m = Math.hypot(x, y); if (m > 1) { x /= m; y /= m; }
+      state.x = x; state.y = y;
+      knob.style.transform = `translate(${x * R * 0.66}px,${-y * R * 0.66}px)`;
+    };
+    el.addEventListener('pointerdown', e => { id = e.pointerId; el.setPointerCapture(id); state.on = true; move(e); });
+    el.addEventListener('pointermove', e => { if (e.pointerId === id) move(e); });
+    const up = e => { if (e.pointerId !== id) return; id = null; state.on = false; state.x = state.y = 0; knob.style.transform = ''; };
+    el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+  }
+  pad($('padL'), drive); pad($('padR'), armPad);
+
+  const dz = v => Math.abs(v) < 0.08 ? 0 : v;
+  let wasDriving = false, wasArming = false;
+  setInterval(() => {
+    if (!connected) return;
+    const k = fast ? 1000 : 500;
+    if (drive.on) { send(`V ${Math.round(dz(drive.y) * k)} ${Math.round(-dz(drive.x) * k * 0.8)}`); wasDriving = true; }
+    else if (wasDriving) { send('V 0 0'); wasDriving = false; }
+    if (armPad.on) {
+      const [jx, jy] = armAlt ? ['wrist', 'elbow'] : ['yaw', 'shoulder'];
+      send(`J ${jx} ${Math.round(-dz(armPad.x) * 90)}`);
+      send(`J ${jy} ${Math.round((armAlt ? -1 : 1) * dz(armPad.y) * 60)}`);
+      wasArming = true;
+    } else if (wasArming) { wasArming = false; }
+    if (!drive.on && !armPad.on) send('H');
+  }, 60);
+
+  // ---------- buttons ----------
+  $('stop').onclick = () => send('S');
+  $('armAlt').onclick = () => { armAlt = !armAlt; $('armAlt').classList.toggle('sel', armAlt); $('armLabel').textContent = armAlt ? 'Arm: wrist / elbow' : 'Arm: yaw / shoulder'; };
+  $('grip').onclick = () => { gripOpen = !gripOpen; send('G ' + (gripOpen ? 90 : 0)); $('grip').textContent = gripOpen ? 'Close gripper' : 'Open gripper'; };
+  document.querySelectorAll('[data-pose]').forEach(b => b.onclick = () => send('P ' + b.dataset.pose));
+  document.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => send('M ' + b.dataset.mode));
+  $('slow').onclick = () => { fast = false; $('slow').classList.add('sel'); $('fast').classList.remove('sel'); };
+  $('fast').onclick = () => { fast = true; $('fast').classList.add('sel'); $('slow').classList.remove('sel'); };
+  $('bleBtn').onclick = connectBle;
+  $('wsBtn').onclick = () => { const h = $('host').value.trim() || location.host; if (h) { localStorage.setItem('host', h); connectWs(h); } };
+  $('saveWifi').onclick = () => { const s = $('ssid').value.trim(), p = $('pass').value; if (s && !/\s/.test(s + p)) { send(`WIFI ${s} ${p}`); setTimeout(() => send('RESTART'), 300); } else $('reply').textContent = 'Name and password cannot contain spaces.'; };
+  $('pair').onclick = () => send('PAIR');
+
+  // ---------- start ----------
+  try { $('host').value = localStorage.getItem('host') || ''; } catch (e) {}
+  if (location.protocol === 'http:' && location.host) connectWs(location.host);
+  else setLink(false, 'not connected: use Bluetooth or enter the car address');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+# build output
+.pio/
+firmware/car/src/web_index.h
+# python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+MUJOCO_LOG.TXT
+# training runs (the shipped policy lives in agent/models/)
+sim/runs/
+*.zip

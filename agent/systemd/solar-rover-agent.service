@@ -1,0 +1,13 @@
+[Unit]
+Description=Solar Rover agent
+After=network.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/solar-rover/agent
+ExecStart=/home/pi/solar-rover/agent/.venv/bin/python -m solar_rover_agent.main --config /home/pi/solar-rover/agent/config.yaml
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

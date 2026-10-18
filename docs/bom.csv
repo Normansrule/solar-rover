@@ -1,0 +1,49 @@
+Section,Part,Qty,Approx unit USD,Approx total USD,Notes
+Drive,TT gear motor 1:48 DUAL SHAFT (3-6V),4,2.00,8.00,Dual shaft: wheel on one side and encoder disc on the other
+Drive,LM393 slot-type speed sensor module,4,1.00,4.00,Fork straddles the printed encoder disc
+Drive,TB6612FNG dual motor driver breakout,2,3.00,6.00,1.2 A continuous / 3.2 A peak per channel
+Drive,100 nF ceramic capacitor (optional),4,0.05,0.20,Across each motor's terminals if they don't come fitted
+Arm,MG996R metal-gear servo (with round metal horn),3,5.00,15.00,Base yaw / shoulder / elbow
+Arm,MG90S metal-gear micro servo,2,3.00,6.00,Wrist / gripper
+Arm,PCA9685 16-channel PWM board,1,4.00,4.00,I2C 0x40
+Control,ESP32-WROOM-32 DevKit 38-pin (original ESP32 not S3/C3),1,6.00,6.00,Car controller: drive / arm / sensors / WiFi / BLE / ESP-NOW
+Control,ESP32 38-pin screw-terminal expansion board (77 x 54 mm),1,4.00,4.00,DevKit plugs in; every GPIO on a screw terminal + S/V/G header. MEASURE its holes (config.scad esp_exp_holes)
+Control,Passive I2C hub module (2.54 mm headers; not a TCA9548A),1,1.50,1.50,One port per I2C board
+Control,Raspberry Pi Zero 2 W,1,15.00,15.00,Onboard agent (optional: run the agent on a PC over WiFi)
+Control,microSD card 32 GB,1,6.00,6.00,Raspberry Pi OS Lite 64-bit
+Control,OV5647 camera for Pi Zero (with 22-pin ribbon),1,8.00,8.00,For the pick-up demo
+Sensors,MPU-6050 IMU (GY-521),1,2.00,2.00,I2C 0x68
+Sensors,VL53L0X time-of-flight (GY-VL53L0XV2),1,3.00,3.00,I2C 0x29; behind the nose window
+Sensors,INA219 current/voltage breakout,2,2.00,4.00,0x41 battery-charge line / 0x44 solar line
+Sensors,DS18B20 waterproof probe + terminal adapter module (with pull-up),1,2.50,2.50,Pack temperature for charge cut-off
+Power,18650 Li-ion cell (matched; e.g. Samsung 30Q or Molicel P28A),4,5.00,20.00,2S2P = 7.4 V nominal / ~6 Ah / ~44 Wh
+Power,4-slot 18650 holder,1,3.00,3.00,Wired 2S2P (docs/wiring.md section 5)
+Power,2S BMS with balance (10-20 A),1,3.00,3.00,
+Power,CN3795 MPPT solar Li-ion charger module (8.4 V / 2S),1,5.00,5.00,Set to 8.40 V and <=1.5 A (docs/wiring.md section 6)
+Power,6V 2W solar panel (~110 x 136 mm),2,5.00,10.00,Wired in series = 12 V / 4 W peak; MEASURE and edit config.scad
+Power,12V 2A DC adapter + 5.5x2.1 mm panel-mount jack,1,7.00,7.00,Wall charging through the same CN3795
+Power,SS54 Schottky diode,2,0.20,0.40,Diode-OR of solar and wall inputs
+Power,1-channel 5 V relay module (optocoupler + high/low trigger jumper),1,1.50,1.50,Charger on/off switch driven by ESP32 GPIO4
+Power,XL4015 5 A buck converter,1,3.00,3.00,6.0 V servo rail
+Power,MP1584 3 A mini buck converter,1,1.50,1.50,5.1 V logic rail
+Power,10 A rocker switch + inline blade fuse holder + 7.5 A fuse,1,3.00,3.00,
+Power,XT30 connector pairs,2,1.00,2.00,
+Power,1000 uF 16 V electrolytic capacitor,2,0.30,0.60,Servo rail + motor rail
+Power,"Wago 221 lever connectors: 4x 221-415 (5-way) + 2x 221-413 (3-way)",1,5.00,5.00,Power rails: no soldered board
+Hardware,M3 brass heat-set inserts (M3 x 5 OD x 4 L),100,0.04,4.00,About 69 used
+Hardware,M2.5 brass heat-set inserts,10,0.05,0.50,Pi + PCA9685
+Hardware,"M3 socket-head screws: 8 mm x45, 10 mm x35, 12 mm x2, 16 mm x8, 30 mm x4, 45 mm x12, 60 mm x1",1,8.00,8.00,"Plus 20 M3 nuts (9 nyloc), 20 washers; full list in docs/assembly.md"
+Hardware,M2.5 x 6 screws x8 + M2 x 6/10 screws x20,1,3.00,3.00,Servos ship with their own horn screws and M2 self-tappers
+Print,PETG filament,1,20.00,20.00,~800 g; PETG because the roof sits in the sun
+Print,TPU 95A filament (tires),0.1,25.00,2.50,~100 g
+Wiring,Silicone wire 18 AWG + 24 AWG + Dupont/JST connectors,1,8.00,8.00,
+Wiring,Dupont jumper wires female-female 20 cm (40-pack),1,3.00,3.00,Module-to-module logic wiring
+Wiring,Double-sided foam tape + small zip ties,1,2.00,2.00,For modules without mounting holes
+Remote,ESP32-WROOM-32 DevKit,1,6.00,6.00,Handheld ESP-NOW remote
+Remote,KY-023 analog joystick module,2,1.50,3.00,Power at 3.3 V
+Remote,12 mm tactile button,2,0.30,0.60,
+Remote,18650 cell + 1-slot holder,1,6.00,6.00,
+Remote,TP4056 USB-C charger board (with protection) + MT3608 boost + slide switch,1,2.50,2.50,
+Remote,0-25 V voltage sensor module (5:1 divider),1,0.50,0.50,Remote battery level
+TOTAL (car),,,,~211,~$182 if the agent runs on a PC instead of the onboard Pi + camera
+TOTAL (with remote),,,,~230,

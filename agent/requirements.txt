@@ -1,0 +1,7 @@
+numpy>=1.24
+pyserial>=3.5
+pyyaml>=6
+websocket-client>=1.6     # only for running the agent from a PC over WiFi
+# optional:
+# onnxruntime>=1.16       # to load .onnx policies (e.g. from PPO)
+# opencv-python-headless  # pick task (vision); on the Pi use: sudo apt install python3-opencv python3-picamera2

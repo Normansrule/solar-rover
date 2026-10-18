@@ -1,0 +1,75 @@
+<!-- Solar Rover: simplified 3-D MuJoCo model (dimensions from hardware/scad/config.scad).
+     4 driven wheels (velocity actuators), 4-DOF arm + gripper (position actuators, ctrl in radians).
+     View it:  python -m solar_rover_sim.mujoco_view   (needs `pip install mujoco`) -->
+<mujoco model="solarrover">
+  <compiler angle="degree"/>
+  <option timestep="0.002" integrator="implicitfast"/>
+  <default>
+    <joint damping="0.02"/>
+    <geom friction="1.0 0.02 0.001" density="600"/>
+    <default class="wheel"><geom type="cylinder" size="0.0325 0.013" rgba="0.15 0.15 0.15 1" friction="1.2 0.02 0.001" density="900"/></default>
+    <default class="link"><geom type="box" rgba="0.95 0.75 0.1 1" density="900"/></default>
+  </default>
+  <asset>
+    <texture name="grid" type="2d" builtin="checker" rgb1=".25 .3 .35" rgb2=".3 .35 .4" width="300" height="300"/>
+    <material name="grid" texture="grid" texrepeat="8 8"/>
+  </asset>
+  <worldbody>
+    <light pos="0 0 3" dir="0 0 -1" directional="true"/>
+    <geom name="floor" type="plane" size="3 3 0.1" material="grid"/>
+    <geom name="box1" type="box" pos="1.0 0.4 0.05" size="0.05 0.05 0.05" rgba="0.9 0.2 0.2 1" density="300"/>
+    <body name="chassis" pos="0 0 0.06">
+      <freejoint/>
+      <!-- deck at z ~ 0.047 above ground when the axles are at 0.0325 -->
+      <geom name="deck" type="box" pos="0 0 0.0145" size="0.15 0.073 0.002" rgba="0.55 0.6 0.68 1" mass="0.35"/>
+      <geom name="battery" type="box" pos="-0.10 0 0.027" size="0.038 0.04 0.0105" rgba="0.2 0.2 0.6 1" mass="0.22"/>
+      <geom name="electronics" type="box" pos="0 0 0.035" size="0.045 0.055 0.02" rgba="0.2 0.4 0.2 1" mass="0.15"/>
+      <geom name="roof" type="box" pos="-0.06 0 0.07" size="0.12 0.073 0.004" rgba="0.1 0.2 0.5 1" mass="0.2"/>
+      <geom name="turret" type="cylinder" pos="0.108 0 0.04" size="0.042 0.024" rgba="0.42 0.5 0.62 1" mass="0.12"/>
+      <geom name="motors" type="box" pos="0 0 -0.005" size="0.11 0.06 0.009" rgba="0.95 0.85 0.2 1" mass="0.12"/>
+      <body name="wheel_fl" pos="0.1 0.087 -0.0145" euler="90 0 0"><joint name="fl" type="hinge" axis="0 0 -1"/><geom class="wheel"/></body>
+      <body name="wheel_rl" pos="-0.1 0.087 -0.0145" euler="90 0 0"><joint name="rl" type="hinge" axis="0 0 -1"/><geom class="wheel"/></body>
+      <body name="wheel_fr" pos="0.1 -0.087 -0.0145" euler="90 0 0"><joint name="fr" type="hinge" axis="0 0 -1"/><geom class="wheel"/></body>
+      <body name="wheel_rr" pos="-0.1 -0.087 -0.0145" euler="90 0 0"><joint name="rr" type="hinge" axis="0 0 -1"/><geom class="wheel"/></body>
+      <!-- arm: shoulder axis 0.1476 m above ground ~ 0.115 above the chassis origin -->
+      <body name="turret_top" pos="0.108 0 0.067">
+        <joint name="yaw" type="hinge" axis="0 0 1" range="-90 90"/>
+        <geom type="cylinder" size="0.042 0.003" rgba="0.42 0.5 0.62 1" mass="0.05"/>
+        <geom type="box" pos="0 0 0.03" size="0.012 0.02 0.03" rgba="0.95 0.75 0.1 1" mass="0.08"/>
+        <body name="upper" pos="0 0 0.045">
+          <joint name="shoulder" type="hinge" axis="0 -1 0" range="-35 120"/>
+          <geom class="link" pos="0.05 0 0" size="0.05 0.026 0.008" mass="0.05"/>
+          <body name="fore" pos="0.1 0 0">
+            <joint name="elbow" type="hinge" axis="0 1 0" range="0 150"/>
+            <geom class="link" pos="0.045 0 0" size="0.045 0.02 0.012" mass="0.09"/>
+            <body name="hand" pos="0.09 0 0">
+              <joint name="wrist" type="hinge" axis="0 -1 0" range="-90 90"/>
+              <geom class="link" pos="0.03 -0.008 0" size="0.03 0.02 0.003" mass="0.03"/>
+              <body name="finger_a" pos="0.03 0.0 0.004"><joint name="grip_a" type="hinge" axis="0 0 1" range="-5 35"/><geom class="link" pos="0.02 -0.004 0.003" size="0.022 0.003 0.003" rgba="0.1 0.1 0.1 1" mass="0.005"/></body>
+              <body name="finger_b" pos="0.03 -0.02 0.004"><joint name="grip_b" type="hinge" axis="0 0 1" range="-35 5"/><geom class="link" pos="0.02 0.004 0.003" size="0.022 0.003 0.003" rgba="0.1 0.1 0.1 1" mass="0.005"/></body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <site name="imu" pos="0 0 0.03"/>
+      <site name="tof" pos="0.18 0 -0.01" euler="0 90 0"/>
+    </body>
+  </worldbody>
+  <equality><joint joint1="grip_a" joint2="grip_b" polycoef="0 -1 0 0 0"/></equality>
+  <actuator>
+    <velocity name="m_fl" joint="fl" kv="0.05" ctrlrange="-18.5 18.5"/>
+    <velocity name="m_rl" joint="rl" kv="0.05" ctrlrange="-18.5 18.5"/>
+    <velocity name="m_fr" joint="fr" kv="0.05" ctrlrange="-18.5 18.5"/>
+    <velocity name="m_rr" joint="rr" kv="0.05" ctrlrange="-18.5 18.5"/>
+    <position name="s_yaw" joint="yaw" kp="3" ctrlrange="-1.571 1.571"/>
+    <position name="s_shoulder" joint="shoulder" kp="5" ctrlrange="-0.611 2.094"/>
+    <position name="s_elbow" joint="elbow" kp="4" ctrlrange="0 2.618"/>
+    <position name="s_wrist" joint="wrist" kp="1" ctrlrange="-1.571 1.571"/>
+    <position name="s_grip" joint="grip_a" kp="0.5" ctrlrange="-0.087 0.611"/>
+  </actuator>
+  <sensor>
+    <gyro name="gyro" site="imu"/>
+    <accelerometer name="accel" site="imu"/>
+    <rangefinder name="tof" site="tof"/>
+  </sensor>
+</mujoco>

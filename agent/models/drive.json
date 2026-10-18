@@ -1,0 +1,15 @@
+{
+ "generations": 400,
+ "eval_30_episodes": {
+  "goal": {
+   "reward": 8.050872823302885,
+   "success": 22,
+   "collisions": 8
+  },
+  "sun": {
+   "reward": 1.1836723258999642,
+   "success": 9,
+   "collisions": 1
+  }
+ }
+}

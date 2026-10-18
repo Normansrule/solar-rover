@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  firmware:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: [car, remote]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-${{ matrix.project }}-${{ hashFiles(format('firmware/{0}/platformio.ini', matrix.project)) }}
+      - run: pip install platformio
+      - run: pio run -d firmware/${{ matrix.project }}
+
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Simulator tests
+        run: |
+          pip install -r sim/requirements.txt
+          cd sim && python -m pytest -q
+      - name: Agent tests
+        run: |
+          pip install -r agent/requirements.txt onnxruntime
+          cd agent && python -m pytest -q
+
+  stl:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Check every STL fits a 220 mm bed
+        run: python3 tools/stl_check.py
+      - name: README progress tracker matches docs/progress.yaml
+        run: |
+          python3 -m pip install pyyaml
+          python3 tools/progress.py --check
+      - name: Wiring diagrams still generate from the pin maps
+        run: python3 tools/wiring_diagram.py
+      - name: No parts collide in the assembly (every arm pose)
+        run: |
+          sudo apt-get update && sudo apt-get install -y openscad
+          python3 -m pip install trimesh==5.1.1 manifold3d==3.5.4
+          python3 tools/fit_check.py --paths
+      - name: Shell scripts parse
+        run: for f in tools/*.sh agent/setup_pi.sh; do bash -n "$f"; done
