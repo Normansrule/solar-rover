@@ -32,9 +32,15 @@ def main():
         def __init__(self, p):
             super().__init__(); self.p = p
         def forward(self, obs):
-            return torch.tanh(self.p.action_net(self.p.mlp_extractor.forward_actor(self.p.extract_features(obs, self.p.pi_features_extractor))))
+            # clamp, like SB3 does to the actions the policy was trained with
+            return torch.clamp(self.p.action_net(self.p.mlp_extractor.forward_actor(self.p.extract_features(obs, self.p.pi_features_extractor))), -1, 1)
 
-    torch.onnx.export(Actor(model.policy), torch.zeros(1, 14), a.out + ".onnx", input_names=["obs"], output_names=["action"], opset_version=13)
+    args = (Actor(model.policy), torch.zeros(1, 14), a.out + ".onnx")
+    kw = dict(input_names=["obs"], output_names=["action"], opset_version=13)
+    try:   # torch >= 2.9 defaults to the dynamo exporter, which needs the extra onnxscript package
+        torch.onnx.export(*args, dynamo=False, **kw)
+    except TypeError:   # older torch has no dynamo argument
+        torch.onnx.export(*args, **kw)
     print("saved", a.out + ".zip", a.out + ".onnx")
 
 

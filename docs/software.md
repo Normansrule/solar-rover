@@ -63,7 +63,7 @@ python3 -m venv .venv
 
 - `train_es` uses only numpy and all CPU cores. 400 generations took about 8 minutes on 4 cores. It writes `drive.npz`, `drive.onnx` and `drive.json` (the eval scores).
 - The included policy (`agent/models/drive.*`) reached the goal in 22 of 30 simulated runs, with 8 collisions. Sun-seeking uses a scripted search by default (`sun_mode: scripted` in `agent/config.yaml`) because it beat the learned policy in the sim, 23/40 against 8/40.
-- **Optional PPO:** `.venv/bin/pip install stable-baselines3` (pulls in PyTorch), then `.venv/bin/python -m solar_rover_sim.train_ppo --steps 2000000 --out ppo_drive`. This script is written but untested.
+- **Optional PPO:** `.venv/bin/pip install stable-baselines3` (pulls in PyTorch), then `.venv/bin/python -m solar_rover_sim.train_ppo --steps 2000000 --out ppo_drive`. It writes `ppo_drive.zip` and `ppo_drive.onnx`; copy the `.onnx` to `agent/models/` and point `agent/config.yaml` at it. Tested with stable-baselines3 2.9 and PyTorch 2.14 (`sim/tests/test_ppo.py` checks the exported ONNX gives the same actions as SB3).
 - **3-D model:** `.venv/bin/python -m solar_rover_sim.mujoco_view --view` opens the MuJoCo viewer of `models/solar_rover.xml`.
 
 ## 5. Raspberry Pi Zero 2 W (onboard agent)

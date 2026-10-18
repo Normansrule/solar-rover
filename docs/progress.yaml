@@ -25,7 +25,7 @@ phases:
       - {task: "Phone web app", status: done}
       - {task: "Simulator and trained driving policy", status: done}
       - {task: "Raspberry Pi agent with tests", status: done}
-      - {task: "PPO trainer run end to end", status: todo}
+      - {task: "PPO trainer run end to end", status: done}
 
   - name: Publish
     icon: "🚀"
