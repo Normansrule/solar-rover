@@ -81,9 +81,10 @@ bool handle(Source src, const char* lineIn, String& reply) {
         lora::Region r;
         if (src == Source::REMOTE || src == Source::LORA || src == Source::AGENT) reply = "ERR not from this link";
         else if (argc == 1) {
-            uint32_t ago = longrange::lastFrameMs() ? (millis() - longrange::lastFrameMs()) / 1000 : 0;
+            String last = "never";
+            if (longrange::lastFrameMs()) last = String((millis() - longrange::lastFrameMs()) / 1000) + "s";
             reply = String("LORA ") + (longrange::ok() ? "ok " : "missing ") + longrange::regionName() +
-                    " rssi=" + longrange::lastRssi() + " last=" + (longrange::lastFrameMs() ? String(ago) + "s" : String("never"));
+                    " rssi=" + String(longrange::lastRssi()) + " last=" + last;
         } else if (argc >= 3 && !strcasecmp(argv[1], "REGION") && lora::parseRegion(argv[2], r)) {
             longrange::setRegion((uint8_t)r); settings::startPairing();
             reply = String("OK ") + longrange::regionName() + ": pairing open 60 s, power the remote on near the car";

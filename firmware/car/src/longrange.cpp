@@ -18,7 +18,7 @@ uint32_t lastGood = 0;
 uint8_t rx[48]; size_t rxLen = 0; uint32_t rxLastMs = 0;
 uint8_t controlsSinceStatus = 0;
 
-bool setup() {
+bool configureModule() {
     uint8_t cfg[lora::CONFIG_LEN];
     lora::configFrame(cfg, region, key);
     digitalWrite(PIN_LORA_MODE, HIGH);           // M0 = M1 = 1: setup mode, always 9600 baud
@@ -78,7 +78,7 @@ void begin() {
     replay.last = savedCounter = settings::loraCounter();
     pinMode(PIN_LORA_MODE, OUTPUT);
     radio.begin(9600, SERIAL_8N1, PIN_LORA_RX, PIN_LORA_TX);
-    moduleOk = setup();
+    moduleOk = configureModule();
     Serial.printf("LoRa E220: %s, %s ch %d\n", moduleOk ? "ok" : "NOT FOUND (check wiring, docs/wiring.md 2a)",
                   lora::profile(region).name, lora::profile(region).channel);
 }
@@ -116,14 +116,14 @@ void fillKeyPacket(uint8_t* out, size_t& n) {
 void setRegion(uint8_t r) {
     region = (lora::Region)r;
     settings::setLoraRegion(r);
-    if (!asleep) moduleOk = setup();
+    if (!asleep) moduleOk = configureModule();
 }
 
 void rekey() {
     settings::newLoraKey();
     settings::loraKey(key);
     replay.last = savedCounter = 0;
-    if (!asleep) moduleOk = setup();            // the module address comes from the key
+    if (!asleep) moduleOk = configureModule();            // the module address comes from the key
 }
 
 }  // namespace longrange
