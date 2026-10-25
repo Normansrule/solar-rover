@@ -1,7 +1,8 @@
 // Solar roof tray (print 2): variant="front" (spans X -60..60) and variant="rear"
 // (spans X -180..-60). Holds one 6V 2W panel (MEASURE yours; edit `panel` in
 // config.scad). Screws down onto its roof posts with M3x8 (counterbored so the
-// heads sit under the panel). The panel snaps under the four lips.
+// heads sit under the panel). The panel snaps under the four lips. The rear
+// tray has two bosses with M3 inserts under its back edge for the LoRa cradle.
 // Print floor-down in PETG (it sits in the sun). No supports.
 include <../config.scad>
 use <../lib.scad>
@@ -19,6 +20,8 @@ difference() {
         rbox([L, W, H], r=5);
         // snap lips (overhang the panel edge by 1 mm)
         for (sy=[-1,1], x=[-35,25]) translate([x, sy*(pk[1]/2) + (sy>0 ? -1 : -1.4), H]) cube([10, 2.4, 1.2]);
+        // LoRa cradle bosses, hanging 4 mm under the floor (room for a zip tie)
+        if (variant == "rear") for (p=lora_bosses()) translate([p[0], p[1], -4]) cylinder(d=8, h=4.01);
     }
     // panel pocket
     translate([0,0,floor_t]) rbox([pk[0], pk[1], pk[2]+0.01], r=1);
@@ -26,6 +29,11 @@ difference() {
     translate([0,0,-1]) rbox([pk[0]-16, pk[1]-16, 20], r=4);
     // post screws, counterbored so the heads sit below the panel
     for (p=posts) translate([p[0],p[1],0]) { hole(m3_clear); translate([0,0,floor_t-3.2]) cylinder(d=m3_head_d, h=10); }
+    // M3 inserts into the bosses from below (5.5 mm deep: 2.5 mm of floor left under the panel)
+    if (variant == "rear") for (p=lora_bosses()) translate([p[0], p[1], -4]) rotate([180,0,0]) insert_m3(0);
     // panel lead exit
     translate([L/2-10, 0, 0]) hole(6);
 }
+
+// relative to the rear tray's centre (-120)
+function lora_bosses() = [for (sy=[-1,1]) [lora_x + lora_boss_dx + 120, sy*lora_boss_dy]];

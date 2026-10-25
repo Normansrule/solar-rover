@@ -1,8 +1,8 @@
-<svg xmlns='http://www.w3.org/2000/svg' width='1180' height='996' viewBox='0 0 1180 996'>
-<rect width='1180' height='996' fill='white'/>
+<svg xmlns='http://www.w3.org/2000/svg' width='1180' height='1136' viewBox='0 0 1180 1136'>
+<rect width='1180' height='1136' fill='white'/>
 <text x='590.0' y='34' font-family='DejaVu Sans, Arial, sans-serif' font-size='22' text-anchor='middle' font-weight='bold' fill='#111'>Solar Rover: ESP32 wiring</text>
 <text x='590.0' y='56' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='middle' font-weight='normal' fill='#555'>Generated from firmware/car/src/config.h. Pins grouped by module, not by board position.</text>
-<rect x='470' y='70' width='240' height='836' rx='10' fill='#1b3a5c' stroke='#0d2238' stroke-width='2'/>
+<rect x='470' y='70' width='240' height='976' rx='10' fill='#1b3a5c' stroke='#0d2238' stroke-width='2'/>
 <text x='590.0' y='94' font-family='DejaVu Sans, Arial, sans-serif' font-size='17' text-anchor='middle' font-weight='bold' fill='white'>ESP32 DevKit 38-pin</text>
 <rect x='40' y='106' width='190' height='224' rx='6' fill='#f3f3f3' stroke='#777'/>
 <text x='135' y='101' font-family='DejaVu Sans, Arial, sans-serif' font-size='13' text-anchor='middle' font-weight='bold' fill='#111'>TB6612 left (FL + RL)</text>
@@ -20,7 +20,7 @@
 <circle cx='230' cy='165.0' r='3.5' fill='#222222'/>
 <circle cx='470' cy='165.0' r='3.5' fill='#222222'/>
 <text x='48' y='191.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='start' font-weight='normal' fill='#111'>STBY</text>
-<text x='478' y='191.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='start' font-weight='normal' fill='white'>GPIO13</text>
+<text x='478' y='191.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='start' font-weight='normal' fill='white'>GPIO12</text>
 <line x1='230' y1='187.0' x2='470' y2='187.0' stroke='#c9a100' stroke-width='3'/>
 <circle cx='230' cy='187.0' r='3.5' fill='#c9a100'/>
 <circle cx='470' cy='187.0' r='3.5' fill='#c9a100'/>
@@ -66,7 +66,7 @@
 <circle cx='230' cy='415.0' r='3.5' fill='#222222'/>
 <circle cx='470' cy='415.0' r='3.5' fill='#222222'/>
 <text x='48' y='441.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='start' font-weight='normal' fill='#111'>STBY</text>
-<text x='478' y='441.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='start' font-weight='normal' fill='white'>GPIO13</text>
+<text x='478' y='441.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='start' font-weight='normal' fill='white'>GPIO12</text>
 <line x1='230' y1='437.0' x2='470' y2='437.0' stroke='#c9a100' stroke-width='3'/>
 <circle cx='230' cy='437.0' r='3.5' fill='#c9a100'/>
 <circle cx='470' cy='437.0' r='3.5' fill='#c9a100'/>
@@ -209,55 +209,82 @@
 <line x1='710' y1='607.0' x2='950' y2='607.0' stroke='#222222' stroke-width='3'/>
 <circle cx='710' cy='607.0' r='3.5' fill='#222222'/>
 <circle cx='950' cy='607.0' r='3.5' fill='#222222'/>
-<rect x='950' y='644' width='190' height='70' rx='6' fill='#f3f3f3' stroke='#777'/>
-<text x='1045' y='639' font-family='DejaVu Sans, Arial, sans-serif' font-size='13' text-anchor='middle' font-weight='bold' fill='#111'>Charger relay module (jumper H)</text>
-<text x='1132' y='663.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>IN</text>
-<text x='702' y='663.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='white'>GPIO4</text>
+<rect x='950' y='644' width='190' height='114' rx='6' fill='#f3f3f3' stroke='#777'/>
+<text x='1045' y='639' font-family='DejaVu Sans, Arial, sans-serif' font-size='13' text-anchor='middle' font-weight='bold' fill='#111'>LoRa radio E220-900T22D</text>
+<text x='1132' y='663.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>M0 + M1</text>
+<text x='702' y='663.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='white'>GPIO0</text>
 <line x1='710' y1='659.0' x2='950' y2='659.0' stroke='#c9a100' stroke-width='3'/>
 <circle cx='710' cy='659.0' r='3.5' fill='#c9a100'/>
 <circle cx='950' cy='659.0' r='3.5' fill='#c9a100'/>
-<text x='1132' y='685.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>VCC</text>
-<line x1='950' y1='681.0' x2='925' y2='681.0' stroke='#d62728' stroke-width='3'/>
-<text x='920' y='685.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='11' text-anchor='end' font-weight='normal' fill='#444'>5V lever connector</text>
-<text x='1132' y='707.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>GND</text>
-<text x='702' y='707.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='white'>GND</text>
-<line x1='710' y1='703.0' x2='950' y2='703.0' stroke='#222222' stroke-width='3'/>
-<circle cx='710' cy='703.0' r='3.5' fill='#222222'/>
-<circle cx='950' cy='703.0' r='3.5' fill='#222222'/>
-<rect x='950' y='740' width='190' height='136' rx='6' fill='#f3f3f3' stroke='#777'/>
-<text x='1045' y='735' font-family='DejaVu Sans, Arial, sans-serif' font-size='13' text-anchor='middle' font-weight='bold' fill='#111'>PCA9685 servo outputs</text>
-<text x='1132' y='759.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>ch 0</text>
-<line x1='950' y1='755.0' x2='925' y2='755.0' stroke='#c9a100' stroke-width='3'/>
-<text x='920' y='759.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='11' text-anchor='end' font-weight='normal' fill='#444'>base yaw MG996R</text>
-<text x='1132' y='781.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>ch 1</text>
-<line x1='950' y1='777.0' x2='925' y2='777.0' stroke='#c9a100' stroke-width='3'/>
-<text x='920' y='781.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='11' text-anchor='end' font-weight='normal' fill='#444'>shoulder MG996R</text>
-<text x='1132' y='803.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>ch 2</text>
-<line x1='950' y1='799.0' x2='925' y2='799.0' stroke='#c9a100' stroke-width='3'/>
-<text x='920' y='803.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='11' text-anchor='end' font-weight='normal' fill='#444'>elbow MG996R</text>
-<text x='1132' y='825.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>ch 3</text>
-<line x1='950' y1='821.0' x2='925' y2='821.0' stroke='#c9a100' stroke-width='3'/>
-<text x='920' y='825.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='11' text-anchor='end' font-weight='normal' fill='#444'>wrist MG90S</text>
-<text x='1132' y='847.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>ch 4</text>
-<line x1='950' y1='843.0' x2='925' y2='843.0' stroke='#c9a100' stroke-width='3'/>
-<text x='920' y='847.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='11' text-anchor='end' font-weight='normal' fill='#444'>gripper MG90S</text>
-<text x='1132' y='869.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>V+ terminal</text>
-<line x1='950' y1='865.0' x2='925' y2='865.0' stroke='#d62728' stroke-width='3'/>
-<text x='920' y='869.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='11' text-anchor='end' font-weight='normal' fill='#444'>6.0 V rail (XL4015)</text>
-<line x1='40' y1='966' x2='66' y2='966' stroke='#d62728' stroke-width='4'/>
-<text x='72' y='970' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='start' font-weight='normal' fill='#111'>+ supply</text>
-<line x1='160' y1='966' x2='186' y2='966' stroke='#222222' stroke-width='4'/>
-<text x='192' y='970' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='start' font-weight='normal' fill='#111'>GND</text>
-<line x1='280' y1='966' x2='306' y2='966' stroke='#ff7f0e' stroke-width='4'/>
-<text x='312' y='970' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='start' font-weight='normal' fill='#111'>3.3 V</text>
-<line x1='400' y1='966' x2='426' y2='966' stroke='#1f77b4' stroke-width='4'/>
-<text x='432' y='970' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='start' font-weight='normal' fill='#111'>I2C SDA</text>
-<line x1='520' y1='966' x2='546' y2='966' stroke='#2ca02c' stroke-width='4'/>
-<text x='552' y='970' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='start' font-weight='normal' fill='#111'>I2C SCL</text>
-<line x1='640' y1='966' x2='666' y2='966' stroke='#c9a100' stroke-width='4'/>
-<text x='672' y='970' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='start' font-weight='normal' fill='#111'>signal</text>
-<line x1='760' y1='966' x2='786' y2='966' stroke='#9467bd' stroke-width='4'/>
-<text x='792' y='970' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='start' font-weight='normal' fill='#111'>UART</text>
-<line x1='880' y1='966' x2='906' y2='966' stroke='#8c564b' stroke-width='4'/>
-<text x='912' y='970' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='start' font-weight='normal' fill='#111'>motor</text>
+<text x='1132' y='685.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>RXD</text>
+<text x='702' y='685.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='white'>GPIO14 (TX1)</text>
+<line x1='710' y1='681.0' x2='950' y2='681.0' stroke='#9467bd' stroke-width='3'/>
+<circle cx='710' cy='681.0' r='3.5' fill='#9467bd'/>
+<circle cx='950' cy='681.0' r='3.5' fill='#9467bd'/>
+<text x='1132' y='707.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>TXD</text>
+<text x='702' y='707.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='white'>GPIO13 (RX1)</text>
+<line x1='710' y1='703.0' x2='950' y2='703.0' stroke='#9467bd' stroke-width='3'/>
+<circle cx='710' cy='703.0' r='3.5' fill='#9467bd'/>
+<circle cx='950' cy='703.0' r='3.5' fill='#9467bd'/>
+<text x='1132' y='729.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>VCC</text>
+<text x='702' y='729.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='white'>3V3</text>
+<line x1='710' y1='725.0' x2='950' y2='725.0' stroke='#ff7f0e' stroke-width='3'/>
+<circle cx='710' cy='725.0' r='3.5' fill='#ff7f0e'/>
+<circle cx='950' cy='725.0' r='3.5' fill='#ff7f0e'/>
+<text x='1132' y='751.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>GND</text>
+<text x='702' y='751.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='white'>GND</text>
+<line x1='710' y1='747.0' x2='950' y2='747.0' stroke='#222222' stroke-width='3'/>
+<circle cx='710' cy='747.0' r='3.5' fill='#222222'/>
+<circle cx='950' cy='747.0' r='3.5' fill='#222222'/>
+<rect x='950' y='784' width='190' height='70' rx='6' fill='#f3f3f3' stroke='#777'/>
+<text x='1045' y='779' font-family='DejaVu Sans, Arial, sans-serif' font-size='13' text-anchor='middle' font-weight='bold' fill='#111'>Charger relay module (jumper H)</text>
+<text x='1132' y='803.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>IN</text>
+<text x='702' y='803.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='white'>GPIO4</text>
+<line x1='710' y1='799.0' x2='950' y2='799.0' stroke='#c9a100' stroke-width='3'/>
+<circle cx='710' cy='799.0' r='3.5' fill='#c9a100'/>
+<circle cx='950' cy='799.0' r='3.5' fill='#c9a100'/>
+<text x='1132' y='825.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>VCC</text>
+<line x1='950' y1='821.0' x2='925' y2='821.0' stroke='#d62728' stroke-width='3'/>
+<text x='920' y='825.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='11' text-anchor='end' font-weight='normal' fill='#444'>5V lever connector</text>
+<text x='1132' y='847.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>GND</text>
+<text x='702' y='847.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='white'>GND</text>
+<line x1='710' y1='843.0' x2='950' y2='843.0' stroke='#222222' stroke-width='3'/>
+<circle cx='710' cy='843.0' r='3.5' fill='#222222'/>
+<circle cx='950' cy='843.0' r='3.5' fill='#222222'/>
+<rect x='950' y='880' width='190' height='136' rx='6' fill='#f3f3f3' stroke='#777'/>
+<text x='1045' y='875' font-family='DejaVu Sans, Arial, sans-serif' font-size='13' text-anchor='middle' font-weight='bold' fill='#111'>PCA9685 servo outputs</text>
+<text x='1132' y='899.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>ch 0</text>
+<line x1='950' y1='895.0' x2='925' y2='895.0' stroke='#c9a100' stroke-width='3'/>
+<text x='920' y='899.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='11' text-anchor='end' font-weight='normal' fill='#444'>base yaw MG996R</text>
+<text x='1132' y='921.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>ch 1</text>
+<line x1='950' y1='917.0' x2='925' y2='917.0' stroke='#c9a100' stroke-width='3'/>
+<text x='920' y='921.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='11' text-anchor='end' font-weight='normal' fill='#444'>shoulder MG996R</text>
+<text x='1132' y='943.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>ch 2</text>
+<line x1='950' y1='939.0' x2='925' y2='939.0' stroke='#c9a100' stroke-width='3'/>
+<text x='920' y='943.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='11' text-anchor='end' font-weight='normal' fill='#444'>elbow MG996R</text>
+<text x='1132' y='965.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>ch 3</text>
+<line x1='950' y1='961.0' x2='925' y2='961.0' stroke='#c9a100' stroke-width='3'/>
+<text x='920' y='965.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='11' text-anchor='end' font-weight='normal' fill='#444'>wrist MG90S</text>
+<text x='1132' y='987.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>ch 4</text>
+<line x1='950' y1='983.0' x2='925' y2='983.0' stroke='#c9a100' stroke-width='3'/>
+<text x='920' y='987.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='11' text-anchor='end' font-weight='normal' fill='#444'>gripper MG90S</text>
+<text x='1132' y='1009.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='end' font-weight='normal' fill='#111'>V+ terminal</text>
+<line x1='950' y1='1005.0' x2='925' y2='1005.0' stroke='#d62728' stroke-width='3'/>
+<text x='920' y='1009.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='11' text-anchor='end' font-weight='normal' fill='#444'>6.0 V rail (XL4015)</text>
+<line x1='40' y1='1106' x2='66' y2='1106' stroke='#d62728' stroke-width='4'/>
+<text x='72' y='1110' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='start' font-weight='normal' fill='#111'>+ supply</text>
+<line x1='160' y1='1106' x2='186' y2='1106' stroke='#222222' stroke-width='4'/>
+<text x='192' y='1110' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='start' font-weight='normal' fill='#111'>GND</text>
+<line x1='280' y1='1106' x2='306' y2='1106' stroke='#ff7f0e' stroke-width='4'/>
+<text x='312' y='1110' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='start' font-weight='normal' fill='#111'>3.3 V</text>
+<line x1='400' y1='1106' x2='426' y2='1106' stroke='#1f77b4' stroke-width='4'/>
+<text x='432' y='1110' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='start' font-weight='normal' fill='#111'>I2C SDA</text>
+<line x1='520' y1='1106' x2='546' y2='1106' stroke='#2ca02c' stroke-width='4'/>
+<text x='552' y='1110' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='start' font-weight='normal' fill='#111'>I2C SCL</text>
+<line x1='640' y1='1106' x2='666' y2='1106' stroke='#c9a100' stroke-width='4'/>
+<text x='672' y='1110' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='start' font-weight='normal' fill='#111'>signal</text>
+<line x1='760' y1='1106' x2='786' y2='1106' stroke='#9467bd' stroke-width='4'/>
+<text x='792' y='1110' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='start' font-weight='normal' fill='#111'>UART</text>
+<line x1='880' y1='1106' x2='906' y2='1106' stroke='#8c564b' stroke-width='4'/>
+<text x='912' y='1110' font-family='DejaVu Sans, Arial, sans-serif' font-size='12' text-anchor='start' font-weight='normal' fill='#111'>motor</text>
 </svg>

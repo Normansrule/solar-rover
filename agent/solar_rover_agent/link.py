@@ -27,6 +27,7 @@ class Telemetry:
     imu: list = field(default_factory=lambda: [0.0, 0.0, 1.0, 0.0, 0.0, 0.0])
     tof: int = -1
     arm: list = field(default_factory=lambda: [0.0, 110.0, 120.0, -70.0, 20.0])
+    lr: list = field(default_factory=lambda: [0, 0, 999999])   # LoRa link: module ok, RSSI dBm, ms since last frame
     received_at: float = 0.0
 
     @classmethod
