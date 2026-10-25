@@ -11,6 +11,7 @@ mkdir -p "$OUT"
 
 # output-name | source file | -D overrides
 PARTS=(
+  "fit_test|fit_test.scad|"
   "deck_front|deck_half.scad|half=\"front\""
   "deck_rear|deck_half.scad|half=\"rear\""
   "motor_clamp_a|motor_clamp.scad|side=\"a\""

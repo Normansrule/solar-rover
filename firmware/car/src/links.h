@@ -8,6 +8,7 @@ void begin();
 void poll();                                  // process queued input (main loop)
 void sendTelemetry();                         // rate-limited per link
 void sendToPi(const char* line);              // e.g. "SHUTDOWN"
+void send(Source to, const String& line);     // a reply sent later (e.g. test results)
 void radiosOff();                             // low-power: WiFi + BLE off
 bool radiosAreOff();
 void enqueue(Source src, const char* line);   // thread-safe

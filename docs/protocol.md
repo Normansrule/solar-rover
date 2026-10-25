@@ -34,6 +34,7 @@ Values are integers unless noted. Speeds run from −1000 to 1000 (= −100 % to
 | `CAL <joint> <offset_deg> <dir>` | Servo trim and direction (1 or −1), saved in flash |
 | `WIFI <ssid> <password>` / `WIFI AP` | Save a home network / go back to AP only (not accepted from the remote) |
 | `PAIR` | Accept a new handheld remote for 60 s |
+| `TEST WHEELS` | Bring-up check: runs each wheel alone and replies `TEST wheel <FL\|RL\|FR\|RR> <verdict>` per wheel, then `TEST done <n>/4 ok`. Car on the floor; `S` stops it. Not accepted from the remote or the agent. |
 | `RESTART` | Reboot the ESP32 |
 | `INFO` | Replies `solar-rover fw 0.1 mode=… ip=…` |
 

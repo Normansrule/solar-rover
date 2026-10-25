@@ -26,19 +26,21 @@ phases:
       - {task: "Simulator and trained driving policy", status: done}
       - {task: "Raspberry Pi agent with tests", status: done}
       - {task: "PPO trainer run end to end", status: done}
+      - {task: "Wheel self-test for bring-up (TEST WHEELS)", status: done}
+      - {task: "Logger and simulator fitter for real-car runs", status: done}
 
   - name: Publish
     icon: "🚀"
     tasks:
       - {task: "Rename to Solar Rover", status: done}
       - {task: "Animated README and progress tracker", status: done}
-      - {task: "Create the GitHub repo and see CI go green", status: next}
+      - {task: "Create the GitHub repo and see CI go green", status: done}
 
   - name: Parts
     icon: "🛒"
     tasks:
-      - {task: "Order the electronics and screws from bom.csv", status: todo}
-      - {task: "Print the fit-test parts and check the MEASURE values", status: todo}
+      - {task: "Order the electronics and screws from bom.csv", status: next}
+      - {task: "Print the fit-test coupon and set the MEASURE values", status: todo}
       - {task: "Print the remaining parts (PETG + TPU tires)", status: todo}
 
   - name: Build

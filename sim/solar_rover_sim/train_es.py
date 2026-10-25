@@ -17,12 +17,12 @@ from multiprocessing import Pool
 
 import numpy as np
 
-from .env import SolarRoverEnv
+from .env import CarParams, SolarRoverEnv
 from .policy import MLPPolicy, init_params, n_params
 
 
-def rollout(theta, seed, task="mixed", episodes=2):
-    env = SolarRoverEnv(task=task, seed=seed)
+def rollout(theta, seed, task="mixed", episodes=2, params=None):
+    env = SolarRoverEnv(task=task, params=params, seed=seed)
     pol = MLPPolicy(theta)
     total = 0.0
     for e in range(episodes):
@@ -44,10 +44,10 @@ def centered_ranks(x):
     return r / (len(x) - 1) - 0.5
 
 
-def evaluate(theta, task, n=20, seed0=10_000):
+def evaluate(theta, task, n=20, seed0=10_000, params=None):
     stats = {"reward": [], "success": 0, "collisions": 0}
     for i in range(n):
-        env = SolarRoverEnv(task=task, seed=seed0 + i)
+        env = SolarRoverEnv(task=task, params=params, seed=seed0 + i)
         pol = MLPPolicy(theta)
         obs, _ = env.reset(seed=seed0 + i)
         done, tot, info = False, 0.0, {}
@@ -74,8 +74,13 @@ def main(argv=None):
     ap.add_argument("--workers", type=int, default=os.cpu_count())
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--init", help="start from an existing .npz policy")
+    ap.add_argument("--params", help="car_fit.json from solar_rover_sim.fit (real-car motor numbers)")
     ap.add_argument("--out", default="policy")
     args = ap.parse_args(argv)
+    params = CarParams.load(args.params) if args.params else None
+    if params:
+        print(f"simulator fitted to the real car: tau={params.tau} v_max={params.v_max} "
+              f"turn_eff={params.turn_eff} strength={params.strength}")
 
     rng = np.random.default_rng(args.seed)
     theta = MLPPolicy.load(args.init).theta if args.init else init_params(rng)
@@ -89,7 +94,7 @@ def main(argv=None):
         noise = rng.normal(size=(args.pop, theta.size))
         cands = np.concatenate([theta + args.sigma * noise, theta - args.sigma * noise])
         seeds = rng.integers(0, 1_000_000, args.pop)
-        jobs = [(c, int(seeds[i % args.pop]), args.task, args.episodes) for i, c in enumerate(cands)]
+        jobs = [(c, int(seeds[i % args.pop]), args.task, args.episodes, params) for i, c in enumerate(cands)]
         rewards = np.array(pool.map(_worker, jobs) if pool else list(map(_worker, jobs)))
         ranks = centered_ranks(rewards)
         grad = (ranks[:args.pop] - ranks[args.pop:]) @ noise / (2 * args.pop * args.sigma)
@@ -99,8 +104,8 @@ def main(argv=None):
         mean_r = float(rewards.mean())
         history.append(mean_r)
         if g % 10 == 0 or g == args.generations:
-            ev = evaluate(theta, "goal", n=10)
-            es = evaluate(theta, "sun", n=10) if args.task != "goal" else {"success": 0}
+            ev = evaluate(theta, "goal", n=10, params=params)
+            es = evaluate(theta, "sun", n=10, params=params) if args.task != "goal" else {"success": 0}
             score = ev["success"] + es["success"]
             print(f"gen {g:4d}  mean reward {mean_r:7.2f}  goal reached {ev['success']}/10  "
                   f"found sun {es['success']}/10  crashes {ev['collisions']}/10  ({time.time() - t0:.0f}s)", flush=True)
@@ -109,9 +114,9 @@ def main(argv=None):
                 MLPPolicy(theta).save(args.out + ".npz")
     pol = MLPPolicy.load(args.out + ".npz")
     pol.export_onnx(args.out + ".onnx")
-    final = {"goal": evaluate(pol.theta, "goal", 30), "sun": evaluate(pol.theta, "sun", 30)}
+    final = {"goal": evaluate(pol.theta, "goal", 30, params=params), "sun": evaluate(pol.theta, "sun", 30, params=params)}
     with open(args.out + ".json", "w") as f:
-        json.dump({"generations": args.generations, "eval_30_episodes": final, "history": history}, f, indent=1)
+        json.dump({"generations": args.generations, "params": args.params, "eval_30_episodes": final, "history": history}, f, indent=1)
     print("saved", args.out + ".npz", args.out + ".onnx", "eval:", json.dumps(final))
 
 

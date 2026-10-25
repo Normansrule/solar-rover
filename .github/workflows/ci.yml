@@ -21,6 +21,11 @@ jobs:
           key: pio-${{ matrix.project }}-${{ hashFiles(format('firmware/{0}/platformio.ini', matrix.project)) }}
       - run: pip install platformio
       - run: pio run -d firmware/${{ matrix.project }}
+      - name: Wheel-test judge (runs on the PC)
+        if: matrix.project == 'car'
+        run: |
+          g++ -std=c++17 -Wall -Werror -Ifirmware/car/src firmware/car/test/test_wheel_check.cpp -o /tmp/twc
+          /tmp/twc
 
   python:
     runs-on: ubuntu-latest
