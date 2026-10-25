@@ -1,6 +1,7 @@
 #include "control.h"
 #include "drive.h"
 #include "arm.h"
+#include "bringup.h"
 
 namespace {
 Mode curMode = Mode::AUTO;
@@ -80,6 +81,7 @@ bool grip(Source s, float pct) { return armTarget(s, J_GRIP, pct); }
 
 void stop(Source s) {
     touch(s, true);
+    bringup::abort();
     drive::stop();
     arm::hold();
     owner = Source::NONE;

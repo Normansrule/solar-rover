@@ -10,6 +10,7 @@
 
 | STL | Qty | Orientation | Notes |
 |---|---|---|---|
+| `fit_test` | 1 | flat | print first (build step 0); about 20 g |
 | `deck_front`, `deck_rear` | 1 each | flip top face down | 5 walls. Ribs and bosses face up. |
 | `motor_clamp_a` | 2 | as exported | front-left + rear-right; no supports |
 | `motor_clamp_b` | 2 | as exported | front-right + rear-left |
@@ -74,11 +75,19 @@ The M2.5 inserts go in the logic tray: 4 for the Pi and 4 for the PCA9685.
 
 ## Build steps
 
-0. **Fit test.** Print `wheel`, `encoder_disc`, `motor_clamp_a` and `roof_post`, and check:
-   - the wheel and encoder disc push onto the TT shaft firmly
-   - the motor bolts line up with the clamp holes
-   - an insert sets cleanly
-   If anything is off, fix `tt_*`, `tol` or `m3_insert_d` in `config.scad` and re-export.
+0. **Fit test.** Print `fit_test` first (one flat plate, about 35 minutes). Each fit comes in a few sizes, and the engraved number under the one that fits is the value to put in `hardware/scad/config.scad`:
+
+   | On the coupon | Check | Set in `config.scad` |
+   |---|---|---|
+   | 4 D-shaft bosses (−0.1 … +0.2) | Press a TT motor shaft into each. Pick the firmest one you can still push on by hand. | Add that number to `tt_shaft_d` and `tt_shaft_flat` (e.g. +0.1 → 5.5 and 3.8) |
+   | TT hole pattern | Hold a motor flat on it, shaft in the big hole: an M3 screw must pass through both small holes into the motor. | `tt_holes` |
+   | M3 inserts 3.9 / 4.1 / 4.3 | Set an insert in each with the iron. Pick the one that goes in straight and doesn't push out with a screw. | `m3_insert_d` |
+   | M2.5 inserts 3.3 / 3.5 / 3.7 | The same, for the Pi and PCA9685 inserts. | `m25_insert_d` |
+   | M2 pilots 1.5 / 1.7 / 1.9 | Drive an M2 screw into each. Pick the one that bites without splitting the boss. | `m2_pilot` |
+   | MG996R and MG90S windows | The servo body should drop in with a little play. Too tight or loose: measure the servo. | `mg996_l`, `mg996_w`, `mg90_l`, `mg90_w` (or `tol`) |
+   | M3 holes 3.2 / 3.4 / 3.6, hex pocket | An M3 screw slides through; a nut presses into the pocket. | `m3_clear`, `m3_nut_af` |
+
+   Then re-export (`bash tools/export_stl.sh`). If you changed the TT values, print one `wheel` and `encoder_disc` to confirm before the rest.
 1. **Deck.** Set the inserts. Bolt the two halves together through the joint flanges: 3 × M3 × 16 with the nuts in the front-half pockets. The alignment pins locate the halves.
 2. **Drive.** For each wheel:
    1. Press the encoder disc onto the motor's inner shaft (hub toward the motor).
@@ -105,7 +114,7 @@ The M2.5 inserts go in the logic tray: 4 for the Pi and 4 for the PCA9685.
    1. Fit the 7.5 A fuse **with the arm resting on something**.
    2. Switch on, keep the car still for 1 s (gyro calibration), and open the serial monitor (115200).
    3. Check `Solar Rover ready. arm=ok imu=ok tof=ok`.
-   4. Lift the wheels off the table and send `D 300 300`: all wheels should turn forward. Swap a motor's wires if one turns backward.
+   4. Put the car on the floor with about 50 cm clear all round and send `TEST WHEELS`. It runs each wheel on its own for under a second and prints one line per wheel, then `TEST done 4/4 ok`. Fix whatever it reports: `reversed` means swap that motor's two wires at the TB6612; `encoder swapped` names the two encoder jumpers to swap. Send `S` to stop it at any time. (On a stand the wheels can't turn the car, so it can only say `direction unknown`; then check by eye that each wheel rolls forward.)
 9. **Servo calibration.**
    1. Before fitting each horn, send `P park` so the servos sit at their park angles, then fit the horn at the matching position.
    2. Fine-tune each joint with `CAL <joint> <offset_deg> <dir>`, e.g. `CAL shoulder 92 1`. The values are saved in flash.

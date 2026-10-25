@@ -40,6 +40,7 @@ class CarParams:
     radius: float = 0.16          # m, collision radius of the body
     v_max: float = 0.60           # m/s at command 1.0 (closed-loop wheel speed)
     tau: float = 0.15             # s, motor + ramp lag
+    turn_eff: float = 0.85        # skid steer turns less than ideal: yaw = turn_eff * (vr - vl) / track
     dt: float = 0.1               # s, agent step (10 Hz)
     tof_max: float = 2.0          # m
     tof_noise: float = 0.02       # m
@@ -51,6 +52,16 @@ class CarParams:
     # domain randomisation ranges
     strength: tuple = (0.75, 1.1)
     slip: float = 0.05
+
+    @classmethod
+    def load(cls, path: str) -> "CarParams":
+        """Defaults overridden by the "params" of a fit file from fit.py."""
+        import json
+        with open(path) as f:
+            d = json.load(f)
+        d = d.get("params", d)
+        known = {k: (tuple(v) if isinstance(v, list) else v) for k, v in d.items() if k in cls.__dataclass_fields__}
+        return cls(**known)
 
 
 @dataclass
@@ -202,7 +213,7 @@ class SolarRoverEnv(_Base):
         s.vr += alpha * (tr - s.vr)
         slip = 1 + self.rng.normal(0, p.slip, 2)
         v = 0.5 * (s.vl * slip[0] + s.vr * slip[1])
-        w = (s.vr * slip[1] - s.vl * slip[0]) / p.track * 0.85   # skid-steer turns less than the ideal
+        w = (s.vr * slip[1] - s.vl * slip[0]) / p.track * p.turn_eff   # skid-steer turns less than the ideal
         nx = s.x + v * math.cos(s.th) * p.dt
         ny = s.y + v * math.sin(s.th) * p.dt
         s.th = (s.th + w * p.dt + math.pi) % (2 * math.pi) - math.pi

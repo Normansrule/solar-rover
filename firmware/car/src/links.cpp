@@ -228,6 +228,7 @@ void sendTelemetry() {
 }
 
 void sendToPi(const char* line) { piSerial.println(line); }
+void send(Source to, const String& line) { reply(to, line); }
 
 void radiosOff() {
     if (radiosDown) return;

@@ -3,6 +3,7 @@
 #include "drive.h"
 #include "arm.h"
 #include "settings.h"
+#include "bringup.h"
 
 namespace {
 const char* JOINT_KEYS[J_COUNT] = {"yaw", "shoulder", "elbow", "wrist", "grip"};
@@ -87,6 +88,10 @@ bool handle(Source src, const char* lineIn, String& reply) {
         settings::startPairing(); reply = "OK pairing 60s";
     } else if (!strcasecmp(c, "RESTART")) {
         reply = "OK"; settings::requestRestart();
+    } else if (!strcasecmp(c, "TEST") && argc >= 2 && !strcasecmp(argv[1], "WHEELS")) {   // bring-up wheel check
+        if (src == Source::REMOTE || src == Source::AGENT) reply = "ERR not from this link";
+        else if (gPower.critical) reply = "ERR battery";
+        else if (!bringup::startWheels(src)) reply = "ERR test running";
     } else if (!strcasecmp(c, "INFO")) {
         reply = String("solar-rover fw 0.1 mode=") + modeName(control::mode()) + " ip=" + settings::ipString();
     } else {
