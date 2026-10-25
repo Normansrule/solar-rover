@@ -1,15 +1,23 @@
-// Module cradle (print 2x tb6612, 1x mp1584): a snap-in holder for the small
-// boards that have no screw holes. The board drops in between the two end
+// Module cradle (print 2x tb6612, 1x mp1584, 1x e220): a snap-in holder for the
+// small boards that have no screw holes. The board drops in between the two end
 // walls, rests on the ledges and clicks under the lips; the other two sides
 // stay open for header pins and wires (solder the TB6612 headers pins-up).
 // Two M2 x 8 screws go down through the floor and a pair of tray slots (9 mm
 // apart, like the slot rows) into M2 nuts under the tray. Print floor down.
-//   -D 'variant="tb6612"' | "mp1584"   or  -D 'board=[x,y]' for any other board
+// The e220 variant holds the LoRa module (pins up, shield down between the
+// ledges, SMA jack out of the open +Y end). It hangs upside down under the rear
+// roof tray on 2x M3x8 into the tray's inserts, screwed in before the module
+// clicks in; a zip tie round cradle and module stops it shaking loose.
+//   -D 'variant="tb6612"' | "mp1584" | "e220"   or  -D 'board=[x,y]' for any other board
 include <../config.scad>
 use <../lib.scad>
 
 variant = "tb6612";
-board = variant == "mp1584" ? cradle_mp1584 : cradle_tb6612;
+board = variant == "mp1584" ? cradle_mp1584 : variant == "e220" ? cradle_e220 : cradle_tb6612;
+// e220: two M3 holes across the cradle near the SMA end (they meet the roof
+// tray inserts, see lora_boss_* in config.scad); others: M2, 9 mm apart along Y
+holes = variant == "e220" ? [[-lora_boss_dy, -lora_boss_dx], [lora_boss_dy, -lora_boss_dx]] : [[0, -4.5], [0, 4.5]];
+hole_d = variant == "e220" ? m3_clear : m2_clear;
 board_t = 1.6;
 floor_t = 2;
 wall = 2;
@@ -35,6 +43,6 @@ difference() {
             }
         }
     }
-    // mounting holes, 9 mm apart to land in two neighbouring tray slots
-    for (sy=[-1,1]) translate([0, sy*4.5, 0]) hole(m2_clear);
+    // mounting holes
+    for (h=holes) translate([h[0], h[1], 0]) hole(hole_d);
 }

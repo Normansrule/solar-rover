@@ -1,5 +1,6 @@
 #include "settings.h"
 #include <Preferences.h>
+#include <esp_random.h>
 
 namespace {
 Preferences prefs;
@@ -34,6 +35,12 @@ void startPairing() { pairUntil = millis() + 60000; }
 bool pairing() { return pairUntil && (int32_t)(pairUntil - millis()) > 0; }
 bool remoteMac(uint8_t mac[6]) { return prefs.getBytes("rmac", mac, 6) == 6; }
 void saveRemoteMac(const uint8_t mac[6]) { prefs.putBytes("rmac", mac, 6); pairUntil = 0; }
+void loraKey(uint8_t key[16]) { if (prefs.getBytes("lkey", key, 16) != 16) { newLoraKey(); prefs.getBytes("lkey", key, 16); } }
+void newLoraKey() { uint8_t k[16]; esp_fill_random(k, sizeof k); prefs.putBytes("lkey", k, sizeof k); prefs.putULong("lctr", 0); }
+uint8_t loraRegion() { return prefs.getUChar("lreg", 0); }
+void setLoraRegion(uint8_t r) { prefs.putUChar("lreg", r); }
+uint32_t loraCounter() { return prefs.getULong("lctr", 0); }
+void saveLoraCounter(uint32_t c) { prefs.putULong("lctr", c); }
 void requestRestart() { restart = true; }
 bool restartRequested() { return restart; }
 void setIp(const String& s) { ip = s; }

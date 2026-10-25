@@ -5,12 +5,13 @@
 namespace {
 Mode curMode = Mode::AUTO;
 Source owner = Source::NONE;
-uint32_t lastSeen[6] = {0};
+uint32_t lastSeen[(int)Source::COUNT] = {0};
 uint32_t lastManualMs = 0;
 uint32_t lastDriveMs = 0;
 bool critHandled = false;
 
 bool isManual(Source s) { return s != Source::AGENT && s != Source::NONE; }
+uint32_t timeoutFor(Source s) { return s == Source::LORA ? LORA_TIMEOUT_MS : LINK_TIMEOUT_MS; }
 
 bool allowed(Source s) {
     if (gPower.critical) return false;
@@ -34,7 +35,8 @@ const char* sourceName(Source s) {
     switch (s) {
         case Source::USB: return "usb"; case Source::REMOTE: return "remote";
         case Source::WEB: return "web"; case Source::BLE: return "ble";
-        case Source::AGENT: return "agent"; default: return "none";
+        case Source::AGENT: return "agent"; case Source::LORA: return "lora";
+        default: return "none";
     }
 }
 const char* modeName(Mode m) { return m == Mode::MANUAL ? "manual" : m == Mode::AGENT ? "agent" : "auto"; }
@@ -103,7 +105,7 @@ bool manualOverrideActive() { return curMode == Mode::AUTO && millis() - lastMan
 void update() {
     uint32_t now = millis();
     // link watchdog: the driving source must keep talking
-    if (owner != Source::NONE && now - lastSeen[(int)owner] > LINK_TIMEOUT_MS) {
+    if (owner != Source::NONE && now - lastSeen[(int)owner] > timeoutFor(owner)) {
         drive::stop();
         owner = Source::NONE;
     }

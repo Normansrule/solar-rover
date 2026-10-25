@@ -8,6 +8,8 @@ Arm,MG90S metal-gear micro servo,2,3.00,6.00,Wrist / gripper
 Arm,PCA9685 16-channel PWM board,1,4.00,4.00,I2C 0x40
 Control,ESP32-WROOM-32 DevKit 38-pin (original ESP32 not S3/C3),1,6.00,6.00,Car controller: drive / arm / sensors / WiFi / BLE / ESP-NOW
 Control,ESP32 38-pin screw-terminal expansion board (77 x 54 mm),1,4.00,4.00,DevKit plugs in; every GPIO on a screw terminal + S/V/G header. MEASURE its holes (config.scad esp_exp_holes)
+Control,Ebyte E220-900T22D LoRa module (900 MHz version; LLCC68; UART),1,8.00,8.00,Long-range link to the remote; hangs in module_cradle_e220 under the rear roof
+Control,868/915 MHz SMA swivel antenna 3 dBi (to match your region),1,2.00,2.00,Stands up behind the rear roof tray
 Control,Passive I2C hub module (2.54 mm headers; not a TCA9548A),1,1.50,1.50,One port per I2C board
 Control,Raspberry Pi Zero 2 W,1,15.00,15.00,Onboard agent (optional: run the agent on a PC over WiFi)
 Control,microSD card 32 GB,1,6.00,6.00,Raspberry Pi OS Lite 64-bit
@@ -45,5 +47,7 @@ Remote,12 mm tactile button,2,0.30,0.60,
 Remote,18650 cell + 1-slot holder,1,6.00,6.00,
 Remote,TP4056 USB-C charger board (with protection) + MT3608 boost + slide switch,1,2.50,2.50,
 Remote,0-25 V voltage sensor module (5:1 divider),1,0.50,0.50,Remote battery level
-TOTAL (car),,,,~211,~$182 if the agent runs on a PC instead of the onboard Pi + camera
-TOTAL (with remote),,,,~230,
+Remote,Ebyte E220-900T22D LoRa module + 868/915 MHz SMA swivel antenna,1,10.00,10.00,Same radio as the car
+Remote,SMA female bulkhead to SMA male pigtail (RG316 10 cm),1,2.00,2.00,Antenna jack in the case wall
+TOTAL (car),,,,~221,~$192 if the agent runs on a PC instead of the onboard Pi + camera
+TOTAL (with remote),,,,~252,

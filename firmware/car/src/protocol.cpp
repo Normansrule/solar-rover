@@ -3,6 +3,8 @@
 #include "drive.h"
 #include "arm.h"
 #include "settings.h"
+#include "longrange.h"
+#include "../../common/lora_link.h"
 
 namespace {
 const char* JOINT_KEYS[J_COUNT] = {"yaw", "shoulder", "elbow", "wrist", "grip"};
@@ -75,6 +77,21 @@ bool handle(Source src, const char* lineIn, String& reply) {
         control::heartbeat(src);
     } else if (!strcasecmp(c, "CL") && argc >= 2) {       // CL <0|1> closed-loop wheel speed
         drive::setClosedLoop(atoi(argv[1]) != 0);
+    } else if (!strcasecmp(c, "LORA")) {                  // LORA | LORA REGION <US|EU> | LORA REKEY
+        lora::Region r;
+        if (src == Source::REMOTE || src == Source::LORA || src == Source::AGENT) reply = "ERR not from this link";
+        else if (argc == 1) {
+            String last = "never";
+            if (longrange::lastFrameMs()) last = String((millis() - longrange::lastFrameMs()) / 1000) + "s";
+            reply = String("LORA ") + (longrange::ok() ? "ok " : "missing ") + longrange::regionName() +
+                    " rssi=" + String(longrange::lastRssi()) + " last=" + last;
+        } else if (argc >= 3 && !strcasecmp(argv[1], "REGION") && lora::parseRegion(argv[2], r)) {
+            longrange::setRegion((uint8_t)r); settings::startPairing();
+            reply = String("OK ") + longrange::regionName() + ": pairing open 60 s, power the remote on near the car";
+        } else if (argc >= 2 && !strcasecmp(argv[1], "REKEY")) {
+            longrange::rekey(); settings::startPairing();
+            reply = "OK new key: pairing open 60 s, power the remote on near the car";
+        } else reply = "ERR usage: LORA | LORA REGION <US|EU> | LORA REKEY";
     } else if (!strcasecmp(c, "CAL") && argc >= 4) {      // CAL <joint> <offset_deg> <dir>
         int j = jointIndex(argv[1]);
         if (j < 0) reply = "ERR joint"; else { arm::calibrate(j, num(argv[2]), atoi(argv[3])); settings::saveCal(j, num(argv[2]), atoi(argv[3])); reply = "OK"; }
@@ -104,12 +121,14 @@ size_t telemetry(char* b, size_t len) {
         "\"temp_c\":%.1f,\"chg\":\"%s\",\"low\":%d,\"crit\":%d,"
         "\"enc\":[%ld,%ld,%ld,%ld],\"spd\":[%.0f,%.0f,%.0f,%.0f],"
         "\"imu\":[%.3f,%.3f,%.3f,%.1f,%.1f,%.1f],\"tof\":%d,"
-        "\"arm\":[%.1f,%.1f,%.1f,%.1f,%.0f]}",
+        "\"arm\":[%.1f,%.1f,%.1f,%.1f,%.0f],\"lr\":[%d,%d,%lu]}",
         (unsigned long)millis(), modeName(control::mode()), sourceName(control::driver()), control::manualOverrideActive(),
         p.batt_v, p.pct, p.charge_ma, p.solar_v, p.solar_mw, p.temp_c, p.charge_state, p.low, p.critical,
         d.enc[0], d.enc[1], d.enc[2], d.enc[3], d.speed_mm_s[0], d.speed_mm_s[1], d.speed_mm_s[2], d.speed_mm_s[3],
         s.ax, s.ay, s.az, s.gx, s.gy, s.gz, s.tof_mm,
-        arm::angle(0), arm::angle(1), arm::angle(2), arm::angle(3), arm::angle(4));
+        arm::angle(0), arm::angle(1), arm::angle(2), arm::angle(3), arm::angle(4),
+        longrange::ok(), longrange::lastRssi(),
+        (unsigned long)(longrange::lastFrameMs() ? min<uint32_t>(millis() - longrange::lastFrameMs(), 999999) : 999999));
     return w < 0 ? 0 : min((size_t)w, len - 1);
 }
 

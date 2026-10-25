@@ -41,6 +41,10 @@ cd "$HOME/solar-rover/firmware/remote"
 
 Pair it: switch the car on, then switch the remote on within 60 s. To pair a different remote later, send `PAIR` (or tap "Pair a remote" in the app) and switch that remote on within 60 s.
 
+Pairing also gives the remote the key for the **long-range LoRa link** (protocol.md, "Long-range link"). Check it on the car's serial monitor: boot prints `LoRa E220: ok, US915 ch 65`, and `LORA` replies with the signal strength and when the remote was last heard. In Europe send `LORA REGION EU` first (it reopens pairing, so switch the remote on again near the car). The remote's own serial monitor prints a status line from the car once a second.
+
+**Range test:** walk away with the remote while someone watches the car. The remote's LED goes from solid to long-on/short-off when it switches to LoRa, at the edge of ESP-NOW range (around 100 m in the open). The car stops for about half a second at the switch-over, then drives on at 60 % top speed. Note the RSSI where the LED starts blinking fast (no link); about −115 dBm is the limit at this air rate.
+
 ## 3. Phone app
 
 1. On the phone, join WiFi **SolarRover-XXXX**, password `solarrover123`.

@@ -1,7 +1,8 @@
 // Handheld remote case (print 2): variant="top" and variant="bottom".
 // Holds an ESP32 DevKit, 2x KY-023 analog joysticks, 2x 12 mm tact buttons,
-// a single 18650 holder, a TP4056 USB-C charger board, an MT3608 boost and a
-// slide switch. Halves join with 4x M3x16 into inserts in the bottom shell.
+// a single 18650 holder, a TP4056 USB-C charger board, an MT3608 boost, a
+// slide switch and an E220 LoRa module, whose SMA pigtail ends in a bulkhead
+// jack in the far wall for the antenna. Halves join with 4x M3x16 into inserts in the bottom shell.
 // Print both shells face-down (outer face on the bed). MEASURE the joystick
 // hole spacing (26.5 x 20.5 mm here).
 include <../config.scad>
@@ -11,6 +12,8 @@ variant = "top";
 L = 160; W = 75; H_top = 14; H_bot = 24; t = 2.4;
 stick_c = [[-50, 0], [50, 0]];
 btn_c   = [[-18, 18], [18, 18]];
+e220_x0 = -2; e220_y0 = 14;   // E220 corner (pin end at -X); SMA end points +X at the bulkhead
+sma_x = 45;
 screws  = [[-L/2+7, W/2-7], [L/2-7, W/2-7], [-L/2+7, -W/2+7], [L/2-7, -W/2+7]];
 
 module shell(h) {
@@ -44,11 +47,16 @@ if (variant == "top") {
             for (sy=[-1,1]) translate([-40, sy*12-1, 0]) cube([80, 2, 8]);
             // ESP32 DevKit rails
             for (sy=[-1,1]) translate([-28, -26+sy*14.5-1, 0]) cube([56, 2, 6]);
+            // E220 rails: module pins up, shield down between them (foam tape). The pin
+            // end sits between the two buttons, where there's height for the Dupont plugs.
+            for (y=[e220_y0, e220_y0+cradle_e220[0]-2]) translate([e220_x0, y, 0]) cube([cradle_e220[1], 2, t+4]);
         }
         for (p=screws) translate([p[0],p[1],0]) insert_m3(H_bot);
         // USB-C charge port (TP4056) and ESP32 USB for flashing
         translate([L/2-1, 20, t+4]) cube([6, 10, 5], center=true);
         translate([-L/2+1, -26, t+5]) cube([6, 12, 7], center=true);
+        // SMA bulkhead jack for the LoRa antenna (1/4-36 thread, nut inside)
+        translate([sma_x, W/2-1, t+10]) rotate([90,0,0]) cylinder(d=6.6, h=8, center=true);
         // slide switch
         translate([L/2-1, -10, t+6]) cube([6, 9, 4.5], center=true);
     }
