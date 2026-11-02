@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Solar Rover: a 3D-printed solar robot car with a crane arm</title>
+<meta name="description" content="A 3D-printed, solar-charged, four-wheel-drive robot car with a crane arm. Drive it from a remote, your phone, or let a learning agent take over.">
+<meta name="theme-color" content="#11171e" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#e7ebef" media="(prefers-color-scheme: light)">
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preload" href="../firmware/car/web/fonts/barlow-sc-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../firmware/car/web/fonts/plex-sans-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../firmware/car/web/tokens.css">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the content</a>
+<header class="bar">
+  <a class="wordmark" href="#top">Solar Rover</a>
+  <nav aria-label="Sections">
+    <a href="#crane">The crane</a>
+    <a href="#power">Power</a>
+    <a href="#drive">Driving</a>
+    <a href="#build">Build it</a>
+  </nav>
+  <button class="theme" id="theme" type="button">Light</button>
+  <a class="gh" href="https://github.com/Normansrule/solar-rover">GitHub</a>
+</header>
+
+<main id="main">
+  <section class="hero" id="top" aria-labelledby="hTitle">
+    <div class="hero-copy">
+      <h1 id="hTitle">A solar rover with a crane on its back.</h1>
+      <p class="lede">Solar Rover is a 3D-printed, four-wheel-drive robot car that charges itself in the sun and picks things up with a four-joint arm. Drive it from a handheld remote or your phone, or hand it to a reinforcement learning agent that learned to drive in a simulator.</p>
+      <p class="hero-links"><a class="btn btn-primary" href="https://github.com/Normansrule/solar-rover">Get the files</a><a class="btn" href="#build">How to build it</a></p>
+    </div>
+
+    <figure class="console" id="crane" aria-labelledby="craneCap">
+      <div class="console-head">
+        <h2 id="craneCap" class="console-title">Try the crane</h2>
+        <p class="hint" id="craneHint">Drag anywhere to move the gripper. Close it over the ball to pick it up.</p>
+      </div>
+      <div class="stage" id="stage">
+        <noscript><img src="img/assembly_side.png" alt="Side view of the rover with its arm raised"></noscript>
+      </div>
+      <p class="status" id="craneStatus" role="status" aria-live="polite"></p>
+      <div class="controls">
+        <div class="seg" role="group" aria-label="Arm poses from the firmware">
+          <button type="button" data-pose="park">Park</button>
+          <button type="button" data-pose="ready" aria-pressed="true" class="sel">Ready</button>
+          <button type="button" data-pose="pick">Pick</button>
+          <button type="button" data-pose="carry">Carry</button>
+        </div>
+        <button type="button" class="btn btn-primary" id="grip" aria-pressed="true">Close gripper</button>
+        <button type="button" class="btn btn-quiet" id="reset">Reset</button>
+      </div>
+      <dl class="readout" aria-label="Joint angles">
+        <div><dt>Shoulder</dt><dd id="rShoulder">45°</dd></div>
+        <div><dt>Elbow</dt><dd id="rElbow">60°</dd></div>
+        <div><dt>Wrist</dt><dd id="rWrist">−10°</dd></div>
+        <div><dt>Gripper</dt><dd id="rGrip">60%</dd></div>
+      </dl>
+      <figcaption>Drawn to scale from the 3D model, with the same link lengths (100, 90 and 70 mm), poses and inverse kinematics as the car. The car would get: <code id="rCmd">A * 45 60 -10 60</code></figcaption>
+    </figure>
+  </section>
+
+  <section class="spec" aria-labelledby="hSpec">
+    <h2 id="hSpec">On paper</h2>
+    <dl class="spec-list">
+      <div><dt>Printed parts</dt><dd>31, all on a 220 × 220 mm bed</dd></div>
+      <div><dt>Screws</dt><dd>M3 into heat-set inserts, M2.5 and M2 for small boards</dd></div>
+      <div><dt>Battery</dt><dd>44 Wh, four 18650 cells</dd></div>
+      <div><dt>Solar</dt><dd>Two 6 V 2 W panels, about 12 Wh on a sunny day</dd></div>
+      <div><dt>Arm</dt><dd>Four joints and a gripper, lifts about 50 g</dd></div>
+      <div><dt>Brains</dt><dd>ESP32 for driving, Raspberry Pi Zero 2 W for the agent</dd></div>
+      <div><dt>Circuit boards to design</dt><dd>None. Off-the-shelf modules only</dd></div>
+      <div><dt>Parts cost</dt><dd>About $211, or $230 with the remote</dd></div>
+    </dl>
+    <figure class="plate">
+      <img src="img/assembly.png" width="1600" height="1000" loading="lazy" alt="The assembled rover in 3D: solar roof on posts, electronics trays underneath, a yellow arm on a round turret at the front">
+      <figcaption>The whole car, rendered from the OpenSCAD model in the repo.</figcaption>
+    </figure>
+  </section>
+
+  <section class="parts-plate" id="parts" aria-labelledby="hParts">
+    <div class="parts-copy">
+      <h2 id="hParts">What's where</h2>
+      <p>Everything rides on one 300 mm deck: power low down at the back, the electronics stacked in the middle, and the crane up front where it can see what it's reaching for. The drawing is the same one as the crane above, with the numbered parts called out.</p>
+    </div>
+    <figure class="parts-fig">
+      <div class="stage" id="partsStage"></div>
+      <figcaption>To scale, in millimetres, from hardware/scad/assembly.scad. Board sizes are typical; measure yours.</figcaption>
+    </figure>
+    <ol class="key">
+      <li><b>Solar roof.</b> Two 6 V 2 W panels on 75 mm posts, high enough to leave room for the plugged-in jumpers underneath.</li>
+      <li><b>Battery and charger.</b> Four 18650 cells (44 Wh) on the deck, with the MPPT charger, the relay that stops charging when the pack is too hot or cold, and a current sensor on the tray above.</li>
+      <li><b>Gear motors.</b> One yellow TT motor per wheel, each with a 20-slot encoder disc, about 5 mm of travel per count.</li>
+      <li><b>Power tray.</b> The two motor drivers, the 16-channel servo board, the buck converters and the lever connectors that join it all up.</li>
+      <li><b>Logic tray.</b> The ESP32 on its screw-terminal board, the IMU (inertial measurement unit), and the Raspberry Pi Zero 2 W that runs the agent.</li>
+      <li><b>Turret.</b> The yaw servo hangs inside and turns everything above it, up to 90° either way.</li>
+      <li><b>Camera.</b> A small Pi camera, tilted on its own mount, for the optional camera-based pick-up.</li>
+    </ol>
+  </section>
+
+  <section class="chapter" id="power" aria-labelledby="hPower">
+    <div class="chapter-copy">
+      <h2 id="hPower">It looks after its own battery.</h2>
+      <p>Two panels on the roof feed one MPPT (maximum power point tracking) charger, and a 12 V wall adapter plugs into the same charger when the sun isn't enough. A temperature probe on the pack stops charging outside 0 to 45 °C, because a car parked in the sun gets hot.</p>
+      <p>The interesting part is what it does when the battery runs down. The panel's own power reading doubles as a light sensor, so the car can go looking for a sunny spot by itself.</p>
+    </div>
+    <figure class="gauge-fig" aria-labelledby="gaugeCap">
+      <div class="gauge" aria-hidden="true">
+        <div class="gauge-bar"><i class="zone-bad"></i><i class="zone-warn"></i></div>
+        <b class="mark" style="--at:15%">15%</b><b class="mark" style="--at:30%">30%</b><b class="mark" style="--at:60%">60%</b>
+      </div>
+      <dl class="levels">
+        <div><dt>Below 30%</dt><dd>Drops whatever it was doing and goes looking for sun.</dd></div>
+        <div><dt>Below 15%</dt><dd>Parks, folds the arm, shuts the Pi down and sleeps while it charges.</dd></div>
+        <div><dt>Back at 60%</dt><dd>Wakes everything up and carries on.</dd></div>
+      </dl>
+      <figcaption id="gaugeCap">The three thresholds in the firmware, from docs/design.md.</figcaption>
+    </figure>
+  </section>
+
+  <section class="chapter flip" id="drive" aria-labelledby="hDrive">
+    <div class="chapter-copy">
+      <h2 id="hDrive">Four ways to drive it.</h2>
+      <ol class="ways">
+        <li><b>A handheld remote</b> you print yourself, talking ESP-NOW, a radio link that needs no router.</li>
+        <li><b>Your phone, over WiFi.</b> The car makes its own network and serves the app itself, so there's nothing to install.</li>
+        <li><b>Your phone, over Bluetooth</b> Low Energy, from Chrome on Android or the Bluefruit Connect app.</li>
+        <li><b>The agent</b> on the Raspberry Pi, or on a PC over WiFi.</li>
+      </ol>
+      <p>In Auto mode the agent drives and you can grab the stick at any time. Your input wins for two seconds, then the agent gets the wheel back. If whoever is driving goes quiet for 300 ms, the motors stop.</p>
+    </div>
+    <figure class="phone">
+      <img src="img/app.png" width="780" height="1688" loading="lazy" alt="The phone app: the drive stick, the crane view with arm poses, the mode switch and battery readings">
+      <figcaption>The phone app, served from the car.</figcaption>
+    </figure>
+  </section>
+
+  <section class="chapter" id="agent" aria-labelledby="hAgent">
+    <div class="chapter-copy">
+      <h2 id="hAgent">It learned to drive in a simulator.</h2>
+      <p>The simulator is a quick 2D (two-dimensional) model of the car with its real size, speed limits, wheel slip and noisy sensors. An Evolution Strategies trainer, numpy only, runs it on any PC and produces a small neural network that reads the goal direction, wheel speeds, gyro, front distance, light and battery, and outputs throttle and steering ten times a second.</p>
+      <p>The policy in the repo reached its goal in 22 of 30 test runs. The honest bit: for finding sun, a simple scripted search still beats it, so that's what the car uses by default.</p>
+      <p><a class="more" href="https://github.com/Normansrule/solar-rover/blob/main/docs/software.md#4-simulator-and-training-on-your-pc">Train your own</a></p>
+    </div>
+    <figure class="plate">
+      <img src="img/anim/arm.gif" width="640" height="400" loading="lazy" alt="The arm moving through its park, ready, pick and carry poses">
+      <figcaption>The arm's firmware poses, rendered from the model.</figcaption>
+    </figure>
+  </section>
+
+  <section class="build" id="build" aria-labelledby="hBuild">
+    <h2 id="hBuild">Build it.</h2>
+    <ol class="steps">
+      <li><h3>Order the parts</h3><p>Modules, motors, servos, cells, panels and screws, all in the <a href="https://github.com/Normansrule/solar-rover/blob/main/docs/bom.csv">bill of materials</a>.</p></li>
+      <li><h3>Print a fit test</h3><p>A wheel, an encoder disc, a motor clamp and a roof post. Measure your parts against the MEASURE values in <code>config.scad</code> before printing the rest.</p></li>
+      <li><h3>Print everything</h3><p>31 parts in PETG (a tough, easy plastic), tires in TPU (a flexible one).</p></li>
+      <li><h3>Assemble and wire</h3><p>Chassis, power, brains, then the turret and arm. Every wire has a pin-by-pin table in <a href="https://github.com/Normansrule/solar-rover/blob/main/docs/wiring.md">wiring.md</a>.</p></li>
+      <li><h3>Flash and drive</h3><p>One command flashes the car. Join its WiFi and open the app.</p></li>
+    </ol>
+    <figure class="plate wide">
+      <img src="img/anim/build.gif" width="640" height="400" loading="lazy" alt="The rover going together step by step">
+      <figcaption>The build order from docs/assembly.md, rendered from the model.</figcaption>
+    </figure>
+    <figure class="progress">
+      <img src="img/anim/progress.svg" width="960" height="236" loading="lazy" alt="Build progress, one segment per task">
+    </figure>
+  </section>
+</main>
+
+<footer class="foot">
+  <p class="foot-name">Solar Rover</p>
+  <p>Open source under the MIT license. Styled after the Allied repair vehicle from Red Alert 2. Type set in Barlow Semi Condensed and IBM Plex Sans.</p>
+  <p><a href="https://github.com/Normansrule/solar-rover">Source on GitHub</a> · <a href="../firmware/car/web/">Phone app (for Bluetooth)</a></p>
+</footer>
+
+<script src="../firmware/car/web/crane.js"></script>
+<script src="site.js"></script>
+</body>
+</html>

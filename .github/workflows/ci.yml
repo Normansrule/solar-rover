@@ -52,6 +52,8 @@ jobs:
           python-version: "3.11"
       - name: Check every STL fits a 220 mm bed
         run: python3 tools/stl_check.py
+      - name: README banner uses the current crane drawing
+        run: node tools/rover_svg.js --check
       - name: README progress tracker matches docs/progress.yaml
         run: |
           python3 -m pip install pyyaml

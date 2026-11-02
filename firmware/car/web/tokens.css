@@ -1,0 +1,97 @@
+/* Solar Rover design tokens, shared by the phone app (index.html, served from the car)
+   and the website (docs/index.html). "Field Service": the console and field manual of
+   a Red Alert 2 style repair vehicle. Steel blue-grey, hazard yellow for the crane and
+   for "selected / happening now", signal red for STOP and nothing else.
+   Fonts: Barlow Semi Condensed and IBM Plex Sans, both SIL Open Font License (fonts/). */
+
+@font-face{font-family:"Barlow SC";src:url(fonts/barlow-sc-600.woff2) format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:"Barlow SC";src:url(fonts/barlow-sc-700.woff2) format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"Plex";src:url(fonts/plex-sans-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Plex";src:url(fonts/plex-sans-500.woff2) format("woff2");font-weight:500;font-display:swap}
+
+:root{
+  color-scheme:light dark;
+  /* night shift (dark) */
+  --ground:#11171e; --panel:#19222c; --raised:#232e3a; --raised-2:#2d3a48; --rule:#2a3542;
+  --ink:#ecf0f4; --ink-2:#a5b2c0; --ink-3:#7b8999;
+  --steel:#c1ccd8; --steel-2:#8797a9; --hull:#6f8297; --hull-2:#8698ab; --hull-3:#53657a; --tire:#0b0f14;
+  --hazard:#f5b800; --on-hazard:#1a1404; --hazard-ink:#f5b800;
+  --stop:#d22a20; --on-stop:#ffffff;
+  --ok:#3ccf8a; --warn:#f0a020; --bad:#ff6b5e;
+  --warn-bg:#3a2a10; --warn-ink:#ffd98c; --bad-bg:#45161a; --bad-ink:#ffc2bc;
+  --cell:#1d3a72; --cell-2:#2b5296;
+  --line:#0b0f14; --hazard-2:#b58800; --pcb:#2c6a4c; --pcb-2:#2a5384; --plug:#c9d1d9;
+
+  --display:"Barlow SC","Arial Narrow",system-ui,sans-serif;
+  --text:"Plex",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+
+  /* 4 px spacing scale */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px; --s10:128px;
+  --r-s:8px; --r-m:12px; --r-l:16px;
+
+  /* motion: strong ease-out for responses, ease-in-out for things moving on screen */
+  --ease-out:cubic-bezier(.23,1,.32,1);
+  --ease-in-out:cubic-bezier(.77,0,.175,1);
+  --t-press:140ms; --t-ui:200ms;
+}
+@media (prefers-color-scheme:light){:root:not([data-theme=dark]){
+  /* workshop daylight (light) */
+  --ground:#e7ebef; --panel:#f8fafb; --raised:#dde3e9; --raised-2:#cdd5de; --rule:#cfd7df;
+  --ink:#111922; --ink-2:#4a5866; --ink-3:#56636f;
+  --steel:#52637a; --steel-2:#7a8a9c; --hull:#7d90a5; --hull-2:#97a8ba; --hull-3:#5d7086; --tire:#1b222b;
+  --hazard-ink:#7a4f00;
+  --stop:#c21f16;
+  --ok:#13804f; --warn:#a65c00; --bad:#c21f16;
+  --warn-bg:#fff1d1; --warn-ink:#5c3700; --bad-bg:#ffe0dc; --bad-ink:#6e0d08;
+  --cell:#25478a; --cell-2:#3a63ad;
+  --line:#26303b; --hazard-2:#c28f00; --pcb:#3a7e5b; --pcb-2:#3b679e; --plug:#eef1f4;
+}}
+:root[data-theme=light]{
+  --ground:#e7ebef; --panel:#f8fafb; --raised:#dde3e9; --raised-2:#cdd5de; --rule:#cfd7df;
+  --ink:#111922; --ink-2:#4a5866; --ink-3:#56636f;
+  --steel:#52637a; --steel-2:#7a8a9c; --hull:#7d90a5; --hull-2:#97a8ba; --hull-3:#5d7086; --tire:#1b222b;
+  --hazard-ink:#7a4f00;
+  --stop:#c21f16;
+  --ok:#13804f; --warn:#a65c00; --bad:#c21f16;
+  --warn-bg:#fff1d1; --warn-ink:#5c3700; --bad-bg:#ffe0dc; --bad-ink:#6e0d08;
+  --cell:#25478a; --cell-2:#3a63ad;
+  --line:#26303b; --hazard-2:#c28f00; --pcb:#3a7e5b; --pcb-2:#3b679e; --plug:#eef1f4;
+}
+
+/* browser surfaces carry the design too */
+::selection{background:var(--hazard);color:var(--on-hazard)}
+:focus-visible{outline:2px solid var(--hazard);outline-offset:3px}
+input,textarea{caret-color:var(--hazard)}
+html{scrollbar-color:var(--raised-2) var(--ground)}
+
+/* the crane drawing (crane.js), used by the app and the website */
+.crane{display:block;width:100%;height:auto;touch-action:none;user-select:none;-webkit-user-select:none}
+/* parts are drawn like a manual's cutaway: flat fills with a thin ink outline */
+.crane .parts rect,.crane .parts circle,.crane .parts path{stroke:var(--line);stroke-width:.6;stroke-linejoin:round}
+.crane .parts .nl{stroke:none}
+.crane .hull{fill:var(--hull)} .crane .hull-top{fill:var(--hull-2)} .crane .hull-dark,.crane .post,.crane .rim,.crane .motor-can{fill:var(--hull-3)}
+.crane .post.back{opacity:.55}
+.crane .tire,.crane .hole,.crane .chip,.crane .servo,.crane .pin,.crane .band{fill:var(--tire)} .crane .band{opacity:.85}
+.crane .tread{fill:none;stroke:var(--hull-3);stroke-width:2.6;stroke-dasharray:2.2 3.3;opacity:.7}
+.crane .metal,.crane .motor,.crane .bolt,.crane .finger{fill:var(--steel-2)} .crane .metal-lt{fill:var(--steel)}
+.crane .servo-2{fill:var(--hull-3)}
+.crane .cell,.crane .batt{fill:var(--cell)} .crane .cell-2,.crane .batt-2,.crane .relay{fill:var(--cell-2)}
+.crane .pcb{fill:var(--pcb)} .crane .pcb-2{fill:var(--pcb-2)} .crane .plug,.crane .term{fill:var(--plug)} .crane .lever{fill:var(--steel-2)}
+.crane .boom{fill:var(--hazard)} .crane .boom-2{fill:var(--hazard-2)}
+.crane .wire{fill:none;stroke:var(--steel-2);stroke-width:1.1;stroke-linecap:round}
+.crane .callouts{pointer-events:none}
+.crane .leader{stroke:var(--ink-3);stroke-width:.8}
+.crane .callout{fill:var(--panel);stroke:var(--ink-2);stroke-width:1.2} .crane .callout-dot{fill:var(--ink-2)}
+.crane .callout-n{fill:var(--ink);font:600 12px var(--display);text-anchor:middle}
+.crane .floor{fill:var(--raised)} .crane .scale{fill:var(--ink-3);font:500 11px var(--text)}
+.crane .reach{fill:none;stroke:var(--hazard);stroke-width:1.5;stroke-dasharray:3 5;opacity:0;transition:opacity var(--t-ui) ease}
+.crane.dragging .reach,.crane.show-reach .reach{opacity:.55}
+.crane .ball{fill:#f2efe6;stroke:var(--steel-2);stroke-width:1}
+.crane .handle{fill:transparent;cursor:grab;outline:none}
+.crane .handle-ring{fill:none;stroke:var(--hazard);stroke-width:2;opacity:0;transition:opacity var(--t-ui) ease}
+.crane .handle:focus-visible + .handle-ring,.crane .handle:hover + .handle-ring,.crane.dragging .handle-ring{opacity:1}
+.crane.dragging .handle{cursor:grabbing}
+.crane .ghost{fill:var(--bad);opacity:0}
+.crane.blocked .ghost{opacity:.8}
+
+@media (prefers-reduced-motion:reduce){.crane .reach,.crane .handle-ring{transition:none}}

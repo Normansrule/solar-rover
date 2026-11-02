@@ -3,14 +3,13 @@
 #
 #   python3 tools/progress.py
 #
-# and it redraws docs/img/anim/progress.svg and roadmap.svg and the checklist
-# in README.md. CI fails if you forget (python3 tools/progress.py --check).
+# and it redraws docs/img/anim/progress.svg and the checklist in README.md.
+# CI fails if you forget (python3 tools/progress.py --check).
 #
-# status: done | next | todo     (one "next" at a time keeps the roadmap clear)
+# status: done | next | todo     (one "next" at a time keeps the chart clear)
 
 phases:
   - name: Design
-    icon: "✏️"
     tasks:
       - {task: "3D model of all 31 printed parts (OpenSCAD, 220 mm bed)", status: done}
       - {task: "Pin-by-pin wiring and diagrams, no custom PCB", status: done}
@@ -18,7 +17,6 @@ phases:
       - {task: "Collision check of every part and arm move (fit_check.py)", status: done}
 
   - name: Software
-    icon: "💾"
     tasks:
       - {task: "Car firmware: drive, arm, power, WiFi, BLE, ESP-NOW (compiles)", status: done}
       - {task: "Handheld remote firmware (compiles)", status: done}
@@ -30,21 +28,18 @@ phases:
       - {task: "Logger and simulator fitter for real-car runs", status: done}
 
   - name: Publish
-    icon: "🚀"
     tasks:
       - {task: "Rename to Solar Rover", status: done}
       - {task: "Animated README and progress tracker", status: done}
       - {task: "Create the GitHub repo and see CI go green", status: done}
 
   - name: Parts
-    icon: "🛒"
     tasks:
       - {task: "Order the electronics and screws from bom.csv", status: next}
       - {task: "Print the fit-test coupon and set the MEASURE values", status: todo}
       - {task: "Print the remaining parts (PETG + TPU tires)", status: todo}
 
   - name: Build
-    icon: "🔧"
     tasks:
       - {task: "Deck, motors, encoders and wheels", status: todo}
       - {task: "Battery, charger and power tray", status: todo}
@@ -53,7 +48,6 @@ phases:
       - {task: "Nose, camera and solar roof", status: todo}
 
   - name: Bring-up
-    icon: "⚡"
     tasks:
       - {task: "First power-up and wheel direction check", status: todo}
       - {task: "Servo calibration", status: todo}
@@ -61,7 +55,6 @@ phases:
       - {task: "Handheld remote paired", status: todo}
 
   - name: Autonomy
-    icon: "🤖"
     tasks:
       - {task: "Drive from the phone and the remote", status: todo}
       - {task: "Agent drives on the Pi", status: todo}
