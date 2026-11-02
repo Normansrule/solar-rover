@@ -56,8 +56,8 @@ Solar 2x 6 V 2 W (series) ── SS54 ─┐
 
 ## RL agent
 
-- **Simulator:** a fast 2-D skid-steer simulator (`sim/`, Gymnasium API) with the car's size from the CAD, its speed limits, motor-strength and wheel-slip randomisation, sensor noise and obstacles. A MuJoCo 3-D model of the car and arm (`sim/models/solar_rover.xml`) is included for later arm work.
-- **Training:** Evolution Strategies, numpy only, on any PC. PPO from Stable-Baselines3 is an optional alternative.
+- **Simulator:** a fast 2-D skid-steer simulator (`sim/`, Gymnasium API) with the car's 36 × 20 cm footprint from the CAD, the time-of-flight sensor's 25° cone, its speed limits, motor-strength and wheel-slip randomisation, sensor noise and obstacles. A MuJoCo 3-D model of the car and arm (`sim/models/solar_rover.xml`) is included for later arm work.
+- **Training:** Evolution Strategies, numpy only, on any PC. PPO from Stable-Baselines3 is an optional alternative. `--as-deployed` trains with the car's speed limit and forward stop in the loop, so the policy learns the system that actually runs, and `solar_rover_sim.evaluate` scores it that way.
 - **Policy:** a 14-input, 2-output MLP. It reads the goal direction, wheel speeds, gyro, front distance, light and battery level, and outputs throttle and turn at 10 Hz. It ships as `.npz` and `.onnx`.
 - **Behaviours on the car:** waypoint navigation with the learned policy, sun seeking (a scripted search by default, since it did better in the sim), and an optional camera-based pick-up.
 

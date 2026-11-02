@@ -18,6 +18,7 @@ from multiprocessing import Pool
 import numpy as np
 
 from .env import CarParams, SolarRoverEnv
+from .evaluate import ON_CAR
 from .policy import MLPPolicy, init_params, n_params
 
 
@@ -75,10 +76,17 @@ def main(argv=None):
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--init", help="start from an existing .npz policy")
     ap.add_argument("--params", help="car_fit.json from solar_rover_sim.fit (real-car motor numbers)")
+    ap.add_argument("--as-deployed", action="store_true",
+                    help="train with the car's speed_scale and forward stop in the loop (recommended)")
+    ap.add_argument("--crash-penalty", type=float, help="reward lost on a collision (default 2)")
     ap.add_argument("--out", default="policy")
     args = ap.parse_args(argv)
-    params = CarParams.load(args.params) if args.params else None
-    if params:
+    params = CarParams.load(args.params) if args.params else CarParams()
+    if args.crash_penalty is not None:
+        params.crash_penalty = args.crash_penalty
+    if args.as_deployed:
+        params.speed_scale, params.stop_tof = ON_CAR["speed_scale"], ON_CAR["stop_tof"]
+    if args.params:
         print(f"simulator fitted to the real car: tau={params.tau} v_max={params.v_max} "
               f"turn_eff={params.turn_eff} strength={params.strength}")
 

@@ -58,7 +58,8 @@ cd "$HOME/solar-rover/sim"
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 .venv/bin/python -m pytest -q                      # 10 tests
-.venv/bin/python -m solar_rover_sim.train_es --generations 400 --task mixed --out "$HOME/solar-rover/agent/models/drive"
+.venv/bin/python -m solar_rover_sim.train_es --generations 500 --as-deployed --crash-penalty 5 --out "$HOME/solar-rover/agent/models/drive"
+.venv/bin/python -m solar_rover_sim.evaluate "$HOME/solar-rover/agent/models/drive.npz"   # score it the way the car runs it
 ```
 
 - `train_es` uses only numpy and all CPU cores. 400 generations took about 8 minutes on 4 cores. It writes `drive.npz`, `drive.onnx` and `drive.json` (the eval scores).
@@ -71,7 +72,7 @@ python3 -m venv .venv
   .venv/bin/python -m solar_rover_agent.sysid --url ws://solar-rover.local/ws --out runs/floor1.jsonl   # or on the Pi, without --url
   cd "$HOME/solar-rover/sim"
   .venv/bin/python -m solar_rover_sim.fit ../agent/runs/*.jsonl --out models/car_fit.json
-  .venv/bin/python -m solar_rover_sim.train_es --generations 400 --params models/car_fit.json --out "$HOME/solar-rover/agent/models/drive"
+  .venv/bin/python -m solar_rover_sim.train_es --generations 500 --as-deployed --crash-penalty 5 --init "$HOME/solar-rover/agent/models/drive.npz" --params models/car_fit.json --out "$HOME/solar-rover/agent/models/drive"
   ```
 
   `sysid` needs about 1.5 m of floor ahead and 0.5 m each side. It stops if something comes within 30 cm or you take over from the app or remote. `fit` prints the old and new value of each number; run it on a few logs from different floors (carpet turns much worse than tiles). Any agent run can be logged too: `python -m solar_rover_agent.main --log runs/drive.jsonl`. `train_ppo` takes the same `--params`.
