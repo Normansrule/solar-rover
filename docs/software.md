@@ -162,7 +162,7 @@ sudo apt install -y openscad xvfb
 "$HOME/solar-rover/.venv/bin/python" "$HOME/solar-rover/tools/render_anim.py"  # build.gif, spin.gif, arm.gif
 ```
 
-The progress tracker (bars, roadmap and checklist) comes from `docs/progress.yaml`. When you finish a task, set its `status` to `done`, mark the next one `next`, and run:
+The progress tracker (chart and checklist) comes from `docs/progress.yaml`. When you finish a task, set its `status` to `done`, mark the next one `next`, and run:
 
 ```bash
 "$HOME/solar-rover/.venv/bin/pip" install pyyaml                           # once
