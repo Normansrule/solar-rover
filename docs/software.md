@@ -62,8 +62,8 @@ python3 -m venv .venv
 .venv/bin/python -m solar_rover_sim.evaluate "$HOME/solar-rover/agent/models/drive.npz"   # score it the way the car runs it
 ```
 
-- `train_es` uses only numpy and all CPU cores. 400 generations took about 8 minutes on 4 cores. It writes `drive.npz`, `drive.onnx` and `drive.json` (the eval scores).
-- The included policy (`agent/models/drive.*`) reached the goal in 22 of 30 simulated runs, with 8 collisions. Sun-seeking uses a scripted search by default (`sun_mode: scripted` in `agent/config.yaml`) because it beat the learned policy in the sim, 23/40 against 8/40.
+- `train_es` uses only numpy and all CPU cores. With `--as-deployed` a generation takes about 5 s on 4 cores (500 generations, about 40 minutes). It writes `drive.npz`, `drive.onnx` and `drive.json` (the eval scores).
+- The included policy (`agent/models/drive.*`), scored by `solar_rover_sim.evaluate` the way the car runs it, reaches the goal in 66% of 500 simulated runs and crashes in 17%; most crashes are side swipes the single forward sensor can't see. Retraining with `--as-deployed` reached 78% but crashed in 20%, so the included policy stays until real-car data (the fitter above) gives a better simulator. Sun-seeking uses a scripted search by default (`sun_mode: scripted` in `agent/config.yaml`) because it beat the learned policy in the sim, 23/40 against 8/40.
 - **Optional PPO:** `.venv/bin/pip install stable-baselines3` (pulls in PyTorch), then `.venv/bin/python -m solar_rover_sim.train_ppo --steps 2000000 --out ppo_drive`. It writes `ppo_drive.zip` and `ppo_drive.onnx`; copy the `.onnx` to `agent/models/` and point `agent/config.yaml` at it. Tested with stable-baselines3 2.9 and PyTorch 2.14 (`sim/tests/test_ppo.py` checks the exported ONNX gives the same actions as SB3).
 - **Fit the simulator to the real car** (once the car drives). The simulator's motor lag, top speed, left/right strength and how well the car turns on the spot are guesses until you measure them. Record the agent's 25-second test pattern, fit, and retrain:
 
