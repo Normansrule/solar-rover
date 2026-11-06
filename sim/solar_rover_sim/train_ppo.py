@@ -16,13 +16,19 @@ def main():
     from stable_baselines3.common.env_util import make_vec_env
     import torch
 
-    from .env import SolarRoverEnv
+    from .env import CarParams, SolarRoverEnv
 
     ap = argparse.ArgumentParser()
     ap.add_argument("--steps", type=int, default=2_000_000)
     ap.add_argument("--out", default="ppo_drive")
+    ap.add_argument("--params", help="car_fit.json from solar_rover_sim.fit (real-car motor numbers)")
+    ap.add_argument("--as-deployed", action="store_true", help="the car's speed_scale and forward stop in the loop")
     a = ap.parse_args()
-    env = make_vec_env(lambda: SolarRoverEnv(task="mixed"), n_envs=8)
+    params = CarParams.load(a.params) if a.params else CarParams()
+    if a.as_deployed:
+        from .evaluate import ON_CAR
+        params.speed_scale, params.stop_tof = ON_CAR["speed_scale"], ON_CAR["stop_tof"]
+    env = make_vec_env(lambda: SolarRoverEnv(task="mixed", params=params), n_envs=8)
     model = PPO("MlpPolicy", env, n_steps=1024, batch_size=2048, gamma=0.99, learning_rate=3e-4,
                 policy_kwargs=dict(net_arch=[64, 64], activation_fn=torch.nn.Tanh), verbose=1)
     model.learn(total_timesteps=a.steps)

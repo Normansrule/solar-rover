@@ -28,7 +28,7 @@ cd "$HOME/solar-rover/firmware/car"
 **First checks in the serial monitor** (type and press Enter):
 
 1. `INFO`: prints the firmware version, mode and IP.
-2. Lift the car off the table, then `D 300 300` and keep sending it (the watchdog stops the wheels 300 ms after the last command). All four wheels should turn forward. Swap the wires of any motor that turns backward (wiring.md section 3).
+2. Car on the floor with 50 cm clear all round, then `TEST WHEELS`. It spins each wheel alone and uses the gyro to see which way the car turned and the encoders to see which wheel moved. Expect `TEST done 4/4 ok`; otherwise each line says what to swap (assembly.md step 8). It also works over Bluetooth from a UART terminal app such as Bluefruit Connect or nRF Toolbox.
 3. `P ready`, then `P park`: the arm should move one joint at a time.
 4. If a joint is off-centre or moves the wrong way, trim it: `CAL shoulder 5 1` (offset in degrees, direction 1 or −1). It's saved in flash.
 
@@ -49,7 +49,8 @@ Pairing also gives the remote the key for the **long-range LoRa link** (protocol
 
 1. On the phone, join WiFi **SolarRover-XXXX**, password `solarrover123`.
 2. Open **http://192.168.4.1**. The app connects by itself.
-3. To use your home WiFi instead, enter it in the app's WiFi box and tap Restart. The car then also appears at **http://solar-rover.local** (or the IP shown in the app) on your home network. Its own `SolarRover-XXXX` network stays on as a fallback.
+3. The stick drives (arrow keys or WASD work on a keyboard). In the crane view, drag to where you want the gripper and the arm works out its own joint angles, or tap a pose. **STOP**, or Escape on a keyboard, stops everything.
+4. To use your home WiFi instead, enter it under "Put the car on your home WiFi" in the app and tap **Save and restart**. The car then also appears at **http://solar-rover.local** (or the IP shown in the app) on your home network. Its own `SolarRover-XXXX` network stays on as a fallback.
 
 **Bluetooth:** browsers only allow Bluetooth on an `https://` page, and the car serves its app over plain `http://`. So for Bluetooth, either:
 - use the free **Adafruit Bluefruit Connect** app (Android and iPhone): connect to "SolarRover", then Controller → Control Pad; or
@@ -61,13 +62,25 @@ Pairing also gives the remote the key for the **long-range LoRa link** (protocol
 cd "$HOME/solar-rover/sim"
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
-.venv/bin/python -m pytest -q                      # 6 tests
-.venv/bin/python -m solar_rover_sim.train_es --generations 400 --task mixed --out "$HOME/solar-rover/agent/models/drive"
+.venv/bin/python -m pytest -q                      # 10 tests
+.venv/bin/python -m solar_rover_sim.train_es --generations 500 --as-deployed --crash-penalty 5 --out "$HOME/solar-rover/agent/models/drive"
+.venv/bin/python -m solar_rover_sim.evaluate "$HOME/solar-rover/agent/models/drive.npz"   # score it the way the car runs it
 ```
 
-- `train_es` uses only numpy and all CPU cores. 400 generations took about 8 minutes on 4 cores. It writes `drive.npz`, `drive.onnx` and `drive.json` (the eval scores).
-- The included policy (`agent/models/drive.*`) reached the goal in 22 of 30 simulated runs, with 8 collisions. Sun-seeking uses a scripted search by default (`sun_mode: scripted` in `agent/config.yaml`) because it beat the learned policy in the sim, 23/40 against 8/40.
+- `train_es` uses only numpy and all CPU cores. With `--as-deployed` a generation takes about 5 s on 4 cores (500 generations, about 40 minutes). It writes `drive.npz`, `drive.onnx` and `drive.json` (the eval scores).
+- The included policy (`agent/models/drive.*`), scored by `solar_rover_sim.evaluate` the way the car runs it, reaches the goal in 66% of 500 simulated runs and crashes in 17%; most crashes are side swipes the single forward sensor can't see. Retraining with `--as-deployed` reached 78% but crashed in 20%, so the included policy stays until real-car data (the fitter above) gives a better simulator. Sun-seeking uses a scripted search by default (`sun_mode: scripted` in `agent/config.yaml`) because it beat the learned policy in the sim, 23/40 against 8/40.
 - **Optional PPO:** `.venv/bin/pip install stable-baselines3` (pulls in PyTorch), then `.venv/bin/python -m solar_rover_sim.train_ppo --steps 2000000 --out ppo_drive`. It writes `ppo_drive.zip` and `ppo_drive.onnx`; copy the `.onnx` to `agent/models/` and point `agent/config.yaml` at it. Tested with stable-baselines3 2.9 and PyTorch 2.14 (`sim/tests/test_ppo.py` checks the exported ONNX gives the same actions as SB3).
+- **Fit the simulator to the real car** (once the car drives). The simulator's motor lag, top speed, left/right strength and how well the car turns on the spot are guesses until you measure them. Record the agent's 25-second test pattern, fit, and retrain:
+
+  ```bash
+  cd "$HOME/solar-rover/agent"
+  .venv/bin/python -m solar_rover_agent.sysid --url ws://solar-rover.local/ws --out runs/floor1.jsonl   # or on the Pi, without --url
+  cd "$HOME/solar-rover/sim"
+  .venv/bin/python -m solar_rover_sim.fit ../agent/runs/*.jsonl --out models/car_fit.json
+  .venv/bin/python -m solar_rover_sim.train_es --generations 500 --as-deployed --crash-penalty 5 --init "$HOME/solar-rover/agent/models/drive.npz" --params models/car_fit.json --out "$HOME/solar-rover/agent/models/drive"
+  ```
+
+  `sysid` needs about 1.5 m of floor ahead and 0.5 m each side. It stops if something comes within 30 cm or you take over from the app or remote. `fit` prints the old and new value of each number; run it on a few logs from different floors (carpet turns much worse than tiles). Any agent run can be logged too: `python -m solar_rover_agent.main --log runs/drive.jsonl`. `train_ppo` takes the same `--params`.
 - **3-D model:** `.venv/bin/python -m solar_rover_sim.mujoco_view --view` opens the MuJoCo viewer of `models/solar_rover.xml`.
 
 ## 5. Raspberry Pi Zero 2 W (onboard agent)
@@ -96,7 +109,7 @@ With your PC on the same WiFi as the car (or joined to `SolarRover-XXXX`):
 cd "$HOME/solar-rover/agent"
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
-.venv/bin/python -m pytest -q                        # 10 tests
+.venv/bin/python -m pytest -q                        # 13 tests
 .venv/bin/python -m solar_rover_agent.main --url ws://solar-rover.local/ws
 ```
 
@@ -153,7 +166,7 @@ sudo apt install -y openscad xvfb
 "$HOME/solar-rover/.venv/bin/python" "$HOME/solar-rover/tools/render_anim.py"  # build.gif, spin.gif, arm.gif
 ```
 
-The progress tracker (bars, roadmap and checklist) comes from `docs/progress.yaml`. When you finish a task, set its `status` to `done`, mark the next one `next`, and run:
+The progress tracker (chart and checklist) comes from `docs/progress.yaml`. When you finish a task, set its `status` to `done`, mark the next one `next`, and run:
 
 ```bash
 "$HOME/solar-rover/.venv/bin/pip" install pyyaml                           # once

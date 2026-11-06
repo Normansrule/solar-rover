@@ -14,6 +14,8 @@ float target[2] = {0, 0};   // left, right (-1..1)
 int   dirSign[2] = {0, 0};  // direction currently applied to each side
 bool  closedLoop = CLOSED_LOOP_DEFAULT;
 uint32_t lastSpeedMs = 0;
+int   testIdx = -1;      // wheel under bring-up test, -1 = normal driving
+float testDuty = 0;
 
 template <int I> void IRAM_ATTR encIsr() {
     uint32_t now = micros();
@@ -64,6 +66,10 @@ void set(float left, float right) {
 
 void stop() { set(0, 0); }
 
+void testWheel(int wheel, float duty) { testIdx = wheel; testDuty = constrain(duty, -1.0f, 1.0f); for (float& v : integ) v = 0; }
+
+uint32_t rawEdges(int wheel) { return encRaw[wheel]; }
+
 void setClosedLoop(bool on) { closedLoop = on; for (float& v : integ) v = 0; }
 
 void update(float dt) {
@@ -89,7 +95,10 @@ void update(float dt) {
         int side = i < 2 ? 0 : 1;
         float cmd = target[side];
         float want = cmd;   // open loop: duty fraction == command
-        if (closedLoop && fabsf(cmd) > 0.02f) {
+        if (testIdx >= 0) {
+            want = i == testIdx ? testDuty : 0;
+            integ[i] = 0;
+        } else if (closedLoop && fabsf(cmd) > 0.02f) {
             float err = cmd * MAX_WHEEL_MM_S - gDrive.speed_mm_s[i];
             integ[i] = constrain(integ[i] + err * SPEED_KI * dt, -0.4f, 0.4f);
             want = cmd + err * SPEED_KP + integ[i];

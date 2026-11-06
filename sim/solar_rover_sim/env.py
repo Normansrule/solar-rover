@@ -37,12 +37,15 @@ ACT_DIM = 2
 @dataclass
 class CarParams:
     track: float = 0.174          # m, wheel centre to wheel centre
-    radius: float = 0.16          # m, collision radius of the body
+    radius: float = 0.16          # m, keep-out radius when placing the car and goal
+    body: tuple = (0.36, 0.20)    # m, footprint for collisions: length (nose to tail) x width over the wheels
     v_max: float = 0.60           # m/s at command 1.0 (closed-loop wheel speed)
     tau: float = 0.15             # s, motor + ramp lag
+    turn_eff: float = 0.85        # skid steer turns less than ideal: yaw = turn_eff * (vr - vl) / track
     dt: float = 0.1               # s, agent step (10 Hz)
     tof_max: float = 2.0          # m
     tof_noise: float = 0.02       # m
+    tof_fov_deg: float = 25.0     # VL53L0X field of view (0 = a single ray)
     solar_peak_w: float = 4.0
     battery_wh: float = 44.0
     world: float = 4.0            # m, square arena side
@@ -51,6 +54,21 @@ class CarParams:
     # domain randomisation ranges
     strength: tuple = (0.75, 1.1)
     slip: float = 0.05
+    crash_penalty: float = 2.0    # reward lost (and episode over) on hitting something
+    # train what the car runs: the agent scales the policy by speed_scale and
+    # won't drive forward under stop_tof (behaviours.py). 1.0 / 0.0 = bare policy.
+    speed_scale: float = 1.0
+    stop_tof: float = 0.0
+
+    @classmethod
+    def load(cls, path: str) -> "CarParams":
+        """Defaults overridden by the "params" of a fit file from fit.py."""
+        import json
+        with open(path) as f:
+            d = json.load(f)
+        d = d.get("params", d)
+        known = {k: (tuple(v) if isinstance(v, list) else v) for k, v in d.items() if k in cls.__dataclass_fields__}
+        return cls(**known)
 
 
 @dataclass
@@ -109,6 +127,24 @@ class SolarRoverEnv(_Base):
             return False
         return bool(np.all(np.hypot(*(self.obs_c - [x, y]).T) > self.obs_r + margin))
 
+    def _body_free(self, x, y, th):
+        """True if the car's rectangular footprint at (x, y, th) touches nothing."""
+        hl, hw = self.p.body[0] / 2, self.p.body[1] / 2
+        c, si = math.cos(th), math.sin(th)
+        corners = [(x + c * ax - si * ay, y + si * ax + c * ay) for ax in (-hl, hl) for ay in (-hw, hw)]
+        half = self.p.world / 2
+        if any(abs(cx) > half or abs(cy) > half for cx, cy in corners):
+            return False
+        if not len(self.obs_r):
+            return True
+        rel = self.obs_c - [x, y]
+        bx = rel @ np.array([c, si])           # obstacle centres in the car's frame
+        by = rel @ np.array([-si, c])
+        dx = np.abs(bx) - hl
+        dy = np.abs(by) - hw
+        dist = np.hypot(np.maximum(dx, 0), np.maximum(dy, 0)) + np.minimum(np.maximum(dx, dy), 0)
+        return bool(np.all(dist > self.obs_r))
+
     def _sample_free(self, margin):
         for _ in range(500):
             x, y = self.rng.uniform(-self.p.world / 2, self.p.world / 2, 2)
@@ -117,10 +153,19 @@ class SolarRoverEnv(_Base):
         return 0.0, 0.0
 
     def _tof(self) -> float:
+        """Nearest hit in the sensor's cone: the VL53L0X sees about 25 degrees, so
+        it is modelled as the closest of rays across that field of view."""
+        p, s = self.p, self.s
+        half = math.radians(p.tof_fov_deg) / 2
+        if half <= 0:
+            return self._ray(s.th)
+        return min(self._ray(s.th + k * half) for k in (-1.0, -0.5, 0.0, 0.5, 1.0))
+
+    def _ray(self, th: float) -> float:
         p, s = self.p, self.s
         ox = s.x + math.cos(s.th) * 0.15
         oy = s.y + math.sin(s.th) * 0.15
-        dx, dy = math.cos(s.th), math.sin(s.th)
+        dx, dy = math.cos(th), math.sin(th)
         best = p.tof_max
         # obstacles (circles)
         rel = self.obs_c - [ox, oy]
@@ -194,23 +239,27 @@ class SolarRoverEnv(_Base):
     def step(self, action):
         p, s = self.p, self.s
         a = np.clip(np.asarray(action, dtype=float), -1, 1)
+        u = a
+        if p.stop_tof > 0 and a[0] + a[1] > 0 and self._tof() < p.stop_tof:
+            u = a - 0.5 * (a[0] + a[1])
+        u = u * p.speed_scale
         # motor lag + strength + slip
         alpha = 1 - math.exp(-p.dt / p.tau)
-        tl = a[0] * p.v_max * self.strength[0]
-        tr = a[1] * p.v_max * self.strength[1]
+        tl = u[0] * p.v_max * self.strength[0]
+        tr = u[1] * p.v_max * self.strength[1]
         s.vl += alpha * (tl - s.vl)
         s.vr += alpha * (tr - s.vr)
         slip = 1 + self.rng.normal(0, p.slip, 2)
         v = 0.5 * (s.vl * slip[0] + s.vr * slip[1])
-        w = (s.vr * slip[1] - s.vl * slip[0]) / p.track * 0.85   # skid-steer turns less than the ideal
+        w = (s.vr * slip[1] - s.vl * slip[0]) / p.track * p.turn_eff   # skid-steer turns less than the ideal
         nx = s.x + v * math.cos(s.th) * p.dt
         ny = s.y + v * math.sin(s.th) * p.dt
-        s.th = (s.th + w * p.dt + math.pi) % (2 * math.pi) - math.pi
-        collided = not self._free(nx, ny, p.radius)
+        nth = (s.th + w * p.dt + math.pi) % (2 * math.pi) - math.pi
+        collided = not self._body_free(nx, ny, nth)
         if not collided:
-            s.x, s.y = nx, ny
+            s.x, s.y, s.th = nx, ny, nth
         # energy: ~3 W base + up to 9 W for the motors
-        watts = 3.0 + 9.0 * 0.5 * (abs(a[0]) + abs(a[1]))
+        watts = 3.0 + 9.0 * 0.5 * (abs(u[0]) + abs(u[1]))
         self.prev_solar = self.solar
         lit = self.light(s.x, s.y)
         self.solar = lit * p.solar_peak_w * (1 + self.rng.normal(0, 0.03))
@@ -233,7 +282,7 @@ class SolarRoverEnv(_Base):
             reward += 0.5 * max(0.0, lit - self.best_light)
             self.best_light = max(self.best_light, lit)
         if collided:
-            reward -= 2.0
+            reward -= p.crash_penalty
             terminated = True
         truncated = self.t >= int(p.episode_s / p.dt)
         self.prev_action = a
