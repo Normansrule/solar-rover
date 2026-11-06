@@ -34,18 +34,20 @@
 | `charge_tray` | 1 | as exported (plate down, legs up) | stands over the battery holder |
 | `module_cradle_tb6612` | 2 | as exported (floor down) | snap-in holders for the two motor drivers. MEASURE the board (`cradle_tb6612`) |
 | `module_cradle_mp1584` | 1 | as exported (floor down) | snap-in holder for the 5.1 V buck (`cradle_mp1584`) |
+| `module_cradle_e220` | 1 | as exported (floor down) | snap-in holder for the LoRa radio, hangs under the rear roof tray (`cradle_e220`) |
 | `remote_case_top`, `remote_case_bottom` | 1 each | outer face down | |
 
 **Total:** about 850 g of PETG and 100 g of TPU.
 
 ## Heat-set inserts
 
-Use a soldering iron at about 230 °C with an insert tip, and press each insert in straight. You need about 69 M3 inserts and 8 M2.5 inserts:
+Use a soldering iron at about 230 °C with an insert tip, and press each insert in straight. You need about 71 M3 inserts and 8 M2.5 inserts:
 
 | Part | M3 inserts |
 |---|---|
 | Deck | 8 motor-clamp bosses (from **below**), 4 turret, 2 nose, 4 tray, 4 charge tray (flush in the plate) |
 | Roof posts | 2 each (both ends) |
+| Rear roof tray | 2, from **below** into the bosses under the back edge (LoRa cradle) |
 | Turret base | 4 (servo posts) |
 | Turret top | 4 shoulder mount + 2 camera |
 | Shoulder mount | 4 servo + 1 pivot |
@@ -59,7 +61,7 @@ The M2.5 inserts go in the logic tray: 4 for the Pi and 4 for the PCA9685.
 
 | Screw | Qty | Where |
 |---|---|---|
-| M3 × 8 | 45 | clamps → deck (8), LM393s (4 + nuts), roof trays (10), turret-top → yaw horn (4), arm plates → horns (8), horn arm → palm (2), camera (2), nose (2) … |
+| M3 × 8 | 47 | clamps → deck (8), LM393s (4 + nuts), roof trays (10), LoRa cradle → rear roof tray (2), turret-top → yaw horn (4), arm plates → horns (8), horn arm → palm (2), camera (2), nose (2) … |
 | M3 × 10 | 35 | roof posts from under the deck (10), turret base → deck (4), servo flanges (12, with washers), pivots (3, with washers), shoulder mount → turret (4) |
 | M3 × 12 | 2 | idler finger pin (with washer) |
 | M3 × 16 | 8 | deck joint (3 + nuts), remote case (4) |
@@ -101,6 +103,7 @@ The M2.5 inserts go in the logic tray: 4 for the Pi and 4 for the PCA9685.
    6. Wrist servo into the forearm, then the gripper palm (pivot) and horn arm, then the gripper servo and fingers.
    7. Run all servo cables along the arm and down the turret-top hole, with a slack loop inside the turret base for ±90° of yaw.
 7. **Sensors and body.** Fit the VL53L0X behind the nose window, then bolt the nose to the deck. Fit the camera to its mount on the turret top. Fit the roof posts (M3 × 10 from under the deck), drop the panels into the roof trays (they snap under the lips), and screw the trays down. Panel leads go through the hole at each tray's front.
+   - **LoRa radio.** Before the rear tray goes on, turn it over and screw the `module_cradle_e220` to the two bosses under its back edge (2 × M3 × 8, from inside the cradle), open end facing backward. Click the E220 in, pins toward you and the SMA jack sticking out past the tray's back edge, and put a zip tie round cradle and module (it passes through the 4 mm gap above the cradle). Screw the swivel antenna on and turn it straight up. Run 5 Dupont jumpers down to the expansion board (wiring.md section 2a) before screwing the tray down.
 8. **First power-up.**
    1. Fit the 7.5 A fuse **with the arm resting on something**.
    2. Switch on, keep the car still for 1 s (gyro calibration), and open the serial monitor (115200).
@@ -115,5 +118,6 @@ The M2.5 inserts go in the logic tray: 4 for the Pi and 4 for the PCA9685.
    1. Set the MT3608 boost to **5.0 V** with a multimeter before connecting anything to it.
    2. Screw the joysticks to the lid standoffs (M2) and push the two buttons into their 12 mm holes.
    3. Lay the ESP32 between the rails in the bottom shell and the 18650 holder in its cradle. Stick the TP4056, MT3608 and the 0–25 V voltage-sensor module to the floor with foam tape: the TP4056's USB-C port goes at the right-hand slot, and the slide switch in its slot.
-   4. Wire it per wiring.md section 8 with Dupont jumpers, then close the case with 4 × M3 × 16.
-   5. Flash it (software.md section 2) and pair it with the car.
+   4. LoRa radio: push the SMA pigtail's bulkhead jack through the hole in the far wall and tighten its nut inside. Lay the E220 on the two short rails next to the battery, pins up and pin end toward the middle of the case, on a strip of foam tape, and screw the pigtail onto its SMA jack.
+   5. Wire it per wiring.md section 8 with Dupont jumpers, then close the case with 4 × M3 × 16 and screw the antenna onto the bulkhead jack.
+   6. Flash it (software.md section 2) and pair it with the car. Pairing also hands the remote the LoRa key.

@@ -40,6 +40,7 @@ PARTS=(
   "charge_tray|charge_tray.scad|"
   "module_cradle_tb6612|module_cradle.scad|variant=\"tb6612\""
   "module_cradle_mp1584|module_cradle.scad|variant=\"mp1584\""
+  "module_cradle_e220|module_cradle.scad|variant=\"e220\""
   "remote_case_top|remote_case.scad|variant=\"top\""
   "remote_case_bottom|remote_case.scad|variant=\"bottom\""
 )

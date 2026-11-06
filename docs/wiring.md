@@ -47,7 +47,7 @@ Plug the DevKit into the **38-pin screw-terminal expansion board**. Every GPIO t
 |---|---|---|
 | 5V terminal on the expansion board | 5.1 V rail (MP1584 OUT+) | Power in. Don't also plug in USB with the battery on unless the DevKit has a VIN diode (most do). |
 | GND | GND bus | Use at least two GND wires. |
-| 3V3 | 3.3 V pins on the expansion board and the I2C hub | Feeds PCA9685 VCC, TB6612 VCC ×2, MPU-6050, VL53L0X, INA219 ×2, LM393 ×4 and the DS18B20 (about 60 mA total). |
+| 3V3 | 3.3 V pins on the expansion board and the I2C hub | Feeds PCA9685 VCC, TB6612 VCC ×2, MPU-6050, VL53L0X, INA219 ×2, LM393 ×4, the DS18B20 (about 60 mA total) and the E220 radio (110 mA peaks while sending). |
 | GPIO21 | I2C hub SDA | PCA9685, MPU-6050, VL53L0X and INA219 ×2 each plug into one hub port |
 | GPIO22 | I2C hub SCL | same |
 | GPIO16 (RX2) | Pi header pin 8 (GPIO14 TXD) | UART 115200 8N1 |
@@ -61,7 +61,7 @@ Plug the DevKit into the **38-pin screw-terminal expansion board**. Every GPIO t
 | GPIO23 | Right TB6612 AIN2 **and** BIN2 | |
 | GPIO18 | Right TB6612 PWMA | Front-right speed |
 | GPIO5 | Right TB6612 PWMB | Rear-right speed |
-| GPIO13 | STBY on **both** TB6612s | The TB6612 has its own pull-down on STBY, so the motors stay off while the ESP32 boots |
+| GPIO12 | STBY on **both** TB6612s | The TB6612 has its own pull-down on STBY, so the motors stay off while the ESP32 boots. GPIO12 is a boot-strapping pin that must be low at reset, and those pull-downs keep it low: don't connect anything else to it |
 | GPIO34 | Front-left LM393 DO | Input-only pin. The module has its own pull-up. |
 | GPIO35 | Rear-left LM393 DO | |
 | GPIO36 (VP) | Front-right LM393 DO | |
@@ -69,7 +69,26 @@ Plug the DevKit into the **38-pin screw-terminal expansion board**. Every GPIO t
 | GPIO32 | DS18B20 adapter module DAT | Adapter VCC → 3V3, GND → GND. The adapter has the 4.7 kΩ pull-up. Tape the probe tip between the cells. |
 | GPIO4 | Relay module IN (charger switch, section 5) | HIGH = relay on = charger connected. Relay VCC → 5.1 V rail, GND → GND, trigger jumper on **H** (high level). |
 | GPIO2 | On-board LED | Status: short flash = OK, solid = charging, slow blink = low battery, fast blink = critical |
-| GPIO0, 12, 14 | unused | GPIO0 and GPIO12 are boot-strapping pins; leave them free. |
+| GPIO13 (RX1) | E220 TXD | LoRa radio, section 2a |
+| GPIO14 (TX1) | E220 RXD | |
+| GPIO0 | E220 M0 **and** M1 | Boot-strapping pin: the DevKit's pull-up holds it high at reset, which is the radio's setup mode. The firmware sets the radio up, then drives it low. The BOOT button still works for flashing |
+| none | | Every GPIO is in use. |
+
+## 2a. LoRa radio (E220-900T22D) on the car
+
+The module hangs in its cradle under the back of the rear roof tray (assembly.md step 7). Five female-female Dupont jumpers (20 cm) run down to the expansion board; join M0 and M1 with a short jumper on the module's pins, or use a Y-jumper.
+
+| E220 pin | Connects to | Notes |
+|---|---|---|
+| M0 | ESP32 GPIO0 | M0 and M1 together: high = setup / sleep, low = normal |
+| M1 | ESP32 GPIO0 | |
+| RXD | ESP32 GPIO14 (TX1) | 3.3 V logic, straight connection |
+| TXD | ESP32 GPIO13 (RX1) | |
+| AUX | not connected | The firmware waits fixed times instead |
+| VCC | 3V3 | About 110 mA while sending. The DevKit's 3.3 V regulator has room for it |
+| GND | GND | |
+
+Screw the antenna on **before** powering up: sending at 22 dBm with no antenna can damage the module.
 
 ## 3. Motor drivers (2× TB6612FNG breakout)
 
@@ -78,7 +97,7 @@ Plug the DevKit into the **38-pin screw-terminal expansion board**. Every GPIO t
 | VM | MAIN+ (after fuse + switch) | MAIN+ |
 | VCC | 3V3 | 3V3 |
 | GND (both pins) | GND | GND |
-| STBY | ESP32 GPIO13 | ESP32 GPIO13 |
+| STBY | ESP32 GPIO12 | ESP32 GPIO12 |
 | AIN1 + BIN1 (link them) | GPIO26 | GPIO19 |
 | AIN2 + BIN2 (link them) | GPIO27 | GPIO23 |
 | PWMA | GPIO25 | GPIO18 |
@@ -211,6 +230,11 @@ Solder wires straight to the Pi pads, or use a right-angle header. A straight he
 | | SW | GPIO26 |
 | Button A (gripper) | one leg GPIO27, other GND | |
 | Button B (arm shift) | one leg GPIO14, other GND | |
+| LoRa radio E220 | M0 **and** M1 | GPIO18 |
+| | RXD | GPIO17 (TX2) |
+| | TXD | GPIO16 (RX2) |
+| | VCC / GND | 3V3 / GND (AUX not connected) |
+| | SMA jack | pigtail to the bulkhead jack in the case wall, antenna on the outside |
 | Battery sense | "0–25 V voltage sensor" module: its VCC/+ input ← TP4056 B+, GND ← B−, S → GPIO39, − → GND | The module is a 5:1 divider; leave its + pin unconnected |
 
 **Power chain:** 18650 → TP4056 USB-C board (with protection) B+/B−. Then TP4056 OUT+ → slide switch → MT3608 boost IN+ (set to **5.0 V** before connecting) → ESP32 VIN. TP4056 OUT− → MT3608 IN− → ESP32 GND.

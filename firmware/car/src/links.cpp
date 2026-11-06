@@ -2,8 +2,10 @@
 #include "protocol.h"
 #include "control.h"
 #include "settings.h"
+#include "longrange.h"
 #include "web_index.h"
 #include "../../common/remote_packet.h"
+#include "../../common/lora_link.h"
 #include <WiFi.h>
 #include <ESPmDNS.h>
 #include <esp_now.h>
@@ -111,15 +113,19 @@ void bleSend(const char* s, size_t n) {
 // ---------------- ESP-NOW handheld remote ----------------
 QueueHandle_t remoteQ;
 uint8_t remoteAddr[6]; bool remoteKnown = false;
+volatile bool keyDue = false;           // pairing: send the LoRa key from the main loop
+uint32_t lastEspNowMs = 0; bool espNowSeen = false;
 
 void onEspNowRecv(const uint8_t* mac, const uint8_t* data, int len) {
     if (len != sizeof(RemotePacket)) return;
     RemotePacket p; memcpy(&p, data, sizeof p);
     if (p.magic != RC_MAGIC) return;
     if (remoteKnown && memcmp(mac, remoteAddr, 6) != 0) return;
+    bool fresh = false;
     if (!remoteKnown) {
         if (!settings::pairing() || p.type != PKT_HELLO) return;
         memcpy(remoteAddr, mac, 6); remoteKnown = true; settings::saveRemoteMac(mac);
+        fresh = true;
     }
     if (p.type == PKT_HELLO) {
         if (!esp_now_is_peer_exist(mac)) {
@@ -129,6 +135,7 @@ void onEspNowRecv(const uint8_t* mac, const uint8_t* data, int len) {
         uint8_t ch; wifi_second_chan_t sc; esp_wifi_get_channel(&ch, &sc);
         CarAck a{RC_MAGIC, PKT_ACK, ch, (uint8_t)gPower.pct, (uint8_t)control::mode()};
         esp_now_send(mac, (uint8_t*)&a, sizeof a);
+        if (fresh || settings::pairing()) keyDue = true;
         return;
     }
     xQueueSend(remoteQ, &p, 0);
@@ -145,24 +152,34 @@ void startEspNow() {
     }
 }
 
-void handleRemote(const RemotePacket& p) {
+void sendLoraKey() {
+    uint8_t buf[sizeof(LoraKeyPacket)]; size_t n = 0;
+    longrange::fillKeyPacket(buf, n);
+    esp_now_send(remoteAddr, buf, n);
+}
+
+// The handheld remote, over ESP-NOW (Source::REMOTE) or LoRa (Source::LORA).
+// Button edges are tracked across both links, which is safe because LoRa
+// frames are only used once ESP-NOW has gone quiet (lora::useLoraControl).
+void handleRemote(const RemotePacket& p, Source src) {
     static uint8_t prevBtn = 0;
     static bool gripOpen = false, ready = false;
     uint8_t pressed = p.buttons & ~prevBtn;
     prevBtn = p.buttons;
-    if ((p.buttons & (BTN_LCLICK | BTN_RCLICK)) == (BTN_LCLICK | BTN_RCLICK)) { control::stop(Source::REMOTE); return; }
+    if ((p.buttons & (BTN_LCLICK | BTN_RCLICK)) == (BTN_LCLICK | BTN_RCLICK)) { control::stop(src); return; }
     if (pressed & BTN_LCLICK) {
         Mode m = control::mode();
-        control::setMode(Source::REMOTE, m == Mode::MANUAL ? Mode::AUTO : m == Mode::AUTO ? Mode::AGENT : Mode::MANUAL);
+        control::setMode(src, m == Mode::MANUAL ? Mode::AUTO : m == Mode::AUTO ? Mode::AGENT : Mode::MANUAL);
     }
-    if (pressed & BTN_RCLICK) { ready = !ready; control::armPose(Source::REMOTE, ready ? "ready" : "park"); }
-    if (pressed & BTN_A) { gripOpen = !gripOpen; control::grip(Source::REMOTE, gripOpen ? 90 : 0); }
-    control::arcade(Source::REMOTE, p.ly / 1000.0f, -p.lx / 1000.0f);
+    if (pressed & BTN_RCLICK) { ready = !ready; control::armPose(src, ready ? "ready" : "park"); }
+    if (pressed & BTN_A) { gripOpen = !gripOpen; control::grip(src, gripOpen ? 90 : 0); }
+    float k = src == Source::LORA ? LORA_SPEED_SCALE : 1.0f;
+    control::arcade(src, k * p.ly / 1000.0f, -k * p.lx / 1000.0f);
     bool alt = p.buttons & BTN_B;
     int jx = alt ? J_WRIST : J_YAW, jy = alt ? J_ELBOW : J_SHOULDER;
-    control::armJog(Source::REMOTE, jx, -p.rx / 1000.0f * JOINTS[jx].max_speed_dps);
-    control::armJog(Source::REMOTE, jy, (alt ? -1 : 1) * p.ry / 1000.0f * JOINTS[jy].max_speed_dps);
-    if (!p.lx && !p.ly && !p.rx && !p.ry && !p.buttons) control::heartbeat(Source::REMOTE);
+    control::armJog(src, jx, -p.rx / 1000.0f * JOINTS[jx].max_speed_dps);
+    control::armJog(src, jy, (alt ? -1 : 1) * p.ry / 1000.0f * JOINTS[jy].max_speed_dps);
+    if (!p.lx && !p.ly && !p.rx && !p.ry && !p.buttons) control::heartbeat(src);
 }
 
 void reply(Source s, const String& r) {
@@ -198,6 +215,7 @@ void begin() {
     startWifi();
     startEspNow();
     startBle();
+    longrange::begin();
 }
 
 void poll() {
@@ -206,7 +224,12 @@ void poll() {
     Msg m;
     while (xQueueReceive(queue, &m, 0) == pdTRUE) { String r; protocol::handle(m.src, m.line, r); reply(m.src, r); }
     RemotePacket p;
-    if (remoteQ) while (xQueueReceive(remoteQ, &p, 0) == pdTRUE) handleRemote(p);
+    if (remoteQ) while (xQueueReceive(remoteQ, &p, 0) == pdTRUE) {
+        lastEspNowMs = millis(); espNowSeen = true;
+        handleRemote(p, Source::REMOTE);
+    }
+    if (keyDue) { keyDue = false; sendLoraKey(); }
+    longrange::poll();
     ws.cleanupClients();
 }
 
@@ -229,11 +252,17 @@ void sendTelemetry() {
 
 void sendToPi(const char* line) { piSerial.println(line); }
 
+void remoteInput(const RemotePacket& p, Source src) {
+    if (src == Source::LORA && !lora::useLoraControl(millis(), lastEspNowMs, espNowSeen)) return;
+    handleRemote(p, src);
+}
+
 void radiosOff() {
     if (radiosDown) return;
     radiosDown = true;
     NimBLEDevice::deinit(true);
     esp_now_deinit();
+    longrange::sleep();
     WiFi.mode(WIFI_OFF);
 }
 bool radiosAreOff() { return radiosDown; }
