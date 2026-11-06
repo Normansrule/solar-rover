@@ -92,6 +92,10 @@ pca_holes   = [55.9, 19.0];   // Adafruit-style PCA9685, M2.5. MEASURE (clones v
 esp_exp_holes = [47, 70];     // ESP32 38-pin screw-terminal expansion board (77x54 mm), M3. MEASURE.
 cradle_tb6612 = [20.5, 20.5];  // TB6612FNG breakout board outline. MEASURE.
 cradle_mp1584 = [22.4, 17.0];  // MP1584 mini buck outline. MEASURE.
+cradle_e220   = [21.0, 36.0];  // Ebyte E220-900T22D LoRa module, without the SMA jack. MEASURE.
+lora_x        = -162;          // E220 cradle centre: hangs under the rear roof tray's overhang,
+lora_boss_dx  = -13;           //   SMA jack out the back; its 2 screws sit lora_boss_dx behind
+lora_boss_dy  = 6;             //   the centre, +-lora_boss_dy to the sides (M3 inserts in the tray)
 module_slot_w = 2.6;          // module-plate slots: M2/M2.5 screw + nut, or a 2.5 mm zip tie
 tray_standoff_h = 32;         // power tray top to logic tray underside
 // charge tray: a slotted plate on 4 legs over the battery holder

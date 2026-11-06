@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include "config.h"
 
-enum class Source : uint8_t { NONE = 0, USB, REMOTE, WEB, BLE, AGENT };
+enum class Source : uint8_t { NONE = 0, USB, REMOTE, WEB, BLE, AGENT, LORA, COUNT };   // LORA = the remote over LoRa
 enum class Mode   : uint8_t { MANUAL = 0, AUTO, AGENT };   // AUTO: agent drives, manual input overrides
 
 const char* sourceName(Source s);

@@ -8,7 +8,7 @@ This is every bought electronic module: what it does in the car, the key specs, 
 
 | Module | Job | Key specs / what to check |
 |---|---|---|
-| **ESP32-WROOM-32 DevKit, 38-pin** | Real-time controller. Runs motor PWM and encoders, the servos (through the PCA9685), sensors, battery and charger logic, and every radio link: WiFi web app, BLE, and ESP-NOW to the handheld remote. | Get the *original* ESP32 (WROOM-32 / -32E/-32D), not S2/S3/C3. The pin map assumes the 38-pin board. It needs a CP2102 or CH340 USB chip for flashing. |
+| **ESP32-WROOM-32 DevKit, 38-pin** | Real-time controller. Runs motor PWM and encoders, the servos (through the PCA9685), sensors, battery and charger logic, and every radio link: WiFi web app, BLE, ESP-NOW to the handheld remote, and the E220 LoRa radio over a UART. | Get the *original* ESP32 (WROOM-32 / -32E/-32D), not S2/S3/C3. The pin map assumes the 38-pin board. It needs a CP2102 or CH340 USB chip for flashing. |
 | **ESP32 38-pin screw-terminal expansion board** | The DevKit plugs into it. Every GPIO gets a screw terminal and a 3-pin S/V/G header, and the board has 3V3/5V/GND blocks and an I2C header. | About 77 × 54 mm. Set its jumper to 3.3 V. Feed it 5 V on the 5V terminal, not its DC jack (its linear regulator would run hot). **MEASURE** the hole spacing (`esp_exp_holes` in `config.scad`). |
 | **Passive I2C hub** | Splits the I2C bus to the five I2C boards. | Any small board with several 4-pin (VCC, GND, SDA, SCL) 2.54 mm headers wired in parallel. Not a TCA9548A, which is a multiplexer and needs extra code. |
 | **Raspberry Pi Zero 2 W** | Runs the RL agent (`agent/`): reads telemetry over UART at 20 Hz, runs the policy at 10 Hz, sends drive commands. Optional camera vision for the pick-up demo. | Use Raspberry Pi OS Lite **64-bit**. Draws about 0.6–1.5 W. Optional: run the agent on a PC over WiFi instead (`--url ws://solar-rover.local/ws`). |
@@ -73,8 +73,16 @@ This is every bought electronic module: what it does in the car, the key specs, 
 | Solar input, sunny day | ≈ 12 Wh/day | |
 | Wall charging at 1.5 A | ≈ 13 W | full in ≈ 4 h |
 
+## Long-range radio (car and remote)
+
+**Ebyte E220-900T22D**, one in the car and one in the remote, about $8 each. A LoRa module (Semtech LLCC68 chip) with its own microcontroller, so the ESP32 just sends and receives bytes over a UART: it needs 2 data pins plus 1 for the mode, and no radio library. 22 dBm, 850–930 MHz, 2.54 mm pin header (no soldering), SMA antenna jack, 21 × 36 mm. Powered from the DevKit's 3V3 (about 110 mA while sending, 10 mA listening).
+
+- **Why this one:** ESP-NOW reaches about 100 m. LoRa at 9.6 kbit/s reaches 1–3 km in the open with the stock antennas (*est.*, the vendor says 5 km at its slowest rate), passes through a wall or two, and is still fast enough for 10 control frames a second. An SPI LoRa board such as the RFM95 needs 5–6 pins and soldering; the car's ESP32 had only 3 pins left, two of them boot-strapping pins. 2.4 GHz long-range options (ESP32 "LR" WiFi mode, nRF24 + PA) reach a few hundred metres at best.
+- **Get the 900 MHz version** (E220-**900**T22D) for the US (915 MHz) and Europe (868 MHz). The 400 MHz version needs different settings and isn't supported by the firmware.
+- **Antennas:** a 3 dBi SMA swivel ("rubber duck") for the band, turned to stand vertical on both ends. The remote's goes on an SMA bulkhead pigtail through its case wall.
+
 ## Handheld remote
 
-ESP32 DevKit, 2× KY-023 joysticks (powered at 3.3 V), 2 buttons, one 18650 cell with a TP4056 USB-C charger, an MT3608 boost set to 5.0 V, and a "0–25 V voltage sensor" module for the battery level. It talks ESP-NOW straight to the car, with no router needed.
+ESP32 DevKit, 2× KY-023 joysticks (powered at 3.3 V), 2 buttons, one 18650 cell with a TP4056 USB-C charger, an MT3608 boost set to 5.0 V, and a "0–25 V voltage sensor" module for the battery level. It talks ESP-NOW straight to the car, with no router needed, and has the same E220 LoRa radio as the car for long range (above).
 
 **Pairing:** the car accepts a new remote during the first 60 s after power-on (or 60 s after the `PAIR` command / the app's "Pair a remote" button). It then remembers that remote's MAC and ignores all others.
