@@ -36,7 +36,7 @@ blk = [0.15,0.15,0.15];
 
 module stlp(n) import(str(stl, n, ".stl"), convexity=6);
 // build step (docs/assembly.md) that fits each part, matched by name prefix
-step_of = [["deck_",1], ["clamp_",2], ["box_motor_",2], ["disc_",2], ["wheel_",2], ["tire_",2],
+step_of = [["cradle_e220",7], ["box_e220",7], ["box_antenna",7], ["deck_",1], ["clamp_",2], ["box_motor_",2], ["disc_",2], ["wheel_",2], ["tire_",2],
            ["box_battery",3], ["charge_tray",3], ["box_relay",3], ["box_cn3795",3], ["box_ina219",3],
            ["box_wago",3], ["power_tray",3], ["standoff_",3], ["cradle_",3], ["box_pca9685",3],
            ["box_xl4015",3], ["box_tb6612",3], ["box_mp1584",3],
@@ -75,6 +75,12 @@ roof_z = deck_top_z + roof_post_h;
 show("roof_tray_front", shell_c) translate([0,0,roof_z]) stlp("roof_tray_front");
 show("roof_tray_rear", shell_c) translate([-120,0,roof_z]) stlp("roof_tray_rear");
 for (x=[0,-120]) show(str("box_panel_", x == 0 ? "front" : "rear"), [0.1,0.2,0.5]) translate([x-panel[0]/2, -panel[1]/2, roof_z+4]) cube(panel);
+// LoRa radio: cradle hanging upside down from the rear roof tray's bosses, the
+// E220 under it (pins down, with Dupont plugs), SMA jack out the back and a
+// swivel antenna turned up behind the roof
+show("cradle_e220", [0.3,0.3,0.3]) translate([lora_x, 0, roof_z-4]) rotate([0,0,-90]) rotate([180,0,0]) stlp("module_cradle_e220");
+show("box_e220", [0.1,0.45,0.35]) translate([lora_x-cradle_e220[1]/2, -cradle_e220[0]/2, roof_z-26]) cube([cradle_e220[1], cradle_e220[0], 15]);
+show("box_antenna", blk) translate([lora_x-cradle_e220[1]/2-12, -4, roof_z-14]) cube([8, 8, 120]);
 
 // ---- electronics ----
 // Stand-ins for the bought modules: footprints are typical sizes (MEASURE yours),

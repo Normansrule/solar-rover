@@ -123,6 +123,8 @@ def car():
             (g("PI_RX") + " (RX2)", "pin 8  GPIO14 TXD", "uart"), (g("PI_TX") + " (TX2)", "pin 10 GPIO15 RXD", "uart"),
             (g("PI_WAKE"), "pin 5  GPIO3", "sig"), ("@5.1 V rail", "pin 2  5V", "pwr"), ("GND", "pin 6  GND", "gnd")]),
         ("DS18B20 probe adapter", [(g("TEMP"), "DAT", "sig"), ("3V3", "VCC", "33"), ("GND", "GND", "gnd")]),
+        ("LoRa radio E220-900T22D", [(g("LORA_MODE"), "M0 + M1", "sig"), (g("LORA_TX") + " (TX1)", "RXD", "uart"),
+                                     (g("LORA_RX") + " (RX1)", "TXD", "uart"), ("3V3", "VCC", "33"), ("GND", "GND", "gnd")]),
         ("Charger relay module (jumper H)", [(g("CHG_EN"), "IN", "sig"), ("@5V lever connector", "VCC", "pwr"), ("GND", "GND", "gnd")]),
         ("PCA9685 servo outputs", [("@base yaw MG996R", "ch 0", "sig"), ("@shoulder MG996R", "ch 1", "sig"),
                                    ("@elbow MG996R", "ch 2", "sig"), ("@wrist MG90S", "ch 3", "sig"),
@@ -145,6 +147,8 @@ def remote():
         ("Buttons (other leg to GND)", [(g("A"), "A: gripper", "sig"), (g("B"), "B: arm shift", "sig")]),
         ("0-25 V voltage sensor module", [(g("VBAT"), "S", "sig"), ("GND", "−", "gnd"), ("@TP4056 B+ / B−", "VCC / GND in", "pwr")]),
         ("Power (MT3608 5.0 V out)", [("VIN", "MT3608 OUT+", "pwr"), ("GND", "MT3608 OUT−", "gnd")]),
+        ("LoRa radio E220-900T22D", [(g("LORA_MODE"), "M0 + M1", "sig"), (g("LORA_TX") + " (TX2)", "RXD", "uart"),
+                                     (g("LORA_RX") + " (RX2)", "TXD", "uart"), ("3V3", "VCC", "33"), ("GND", "GND", "gnd")]),
     ]
     return harness("Handheld remote: ESP32 wiring", "ESP32 DevKit",
                    left, right, "Generated from firmware/remote/src/main.cpp. 18650 → TP4056 → switch → MT3608 (5.0 V) → VIN.")

@@ -13,13 +13,15 @@ from solar_rover_agent.odometry import Odometry
 SAMPLE = {"t": 1234, "mode": "auto", "src": "agent", "ovr": 0, "bat_v": 7.9, "bat_pct": 72, "chg_ma": 300,
           "sol_v": 11.6, "sol_mw": 2100, "temp_c": 31.5, "chg": "solar", "low": 0, "crit": 0,
           "enc": [10, 10, 12, 12], "spd": [100, 100, 120, 120], "imu": [0, 0, 1, 0, 0, 5.0], "tof": 450,
-          "arm": [0, 110, 120, -70, 20]}
+          "arm": [0, 110, 120, -70, 20], "lr": [1, -92, 40]}
 
 
 def test_telemetry_parse():
     t = Telemetry.parse(json.dumps(SAMPLE))
     assert t.bat_pct == 72 and t.tof == 450 and t.chg == "solar"
     assert Telemetry.parse("not json") is None
+    assert t.lr == [1, -92, 40]
+    assert Telemetry.parse(json.dumps({k: v for k, v in SAMPLE.items() if k != "lr"})).lr == [0, 0, 999999]
 
 
 def test_observation_matches_simulator():

@@ -29,7 +29,8 @@ constexpr int PIN_R_IN1   = 19;  // right driver AIN1 + BIN1
 constexpr int PIN_R_IN2   = 23;  // right driver AIN2 + BIN2
 constexpr int PIN_FR_PWM  = 18;  // right driver PWMA (front-right motor)
 constexpr int PIN_RR_PWM  = 5;   // right driver PWMB (rear-right motor)
-constexpr int PIN_MOTOR_STBY = 13; // both drivers' STBY (the TB6612's own 200k pull-down keeps motors off at boot)
+constexpr int PIN_MOTOR_STBY = 12; // both drivers' STBY. GPIO12 is a boot strap that must be low at reset;
+                                   // the TB6612s' own 200k pull-downs hold it low (and the motors off) while booting
 
 // ---------------- Wheel encoders (LM393 slot sensors, input-only pins) ----------------
 constexpr int PIN_ENC_FL = 34;
@@ -41,6 +42,12 @@ constexpr int PIN_ENC_RR = 39;   // "VN"
 constexpr int PIN_TEMP   = 32;   // DS18B20 probe data (1-Wire; the adapter module has the pull-up)
 constexpr int PIN_CHG_EN = 4;    // relay module IN (jumper on H): HIGH = relay on = charger input connected
 constexpr int PIN_LED    = 2;    // on-board LED
+
+// ---------------- Long-range radio: Ebyte E220-900T22D LoRa module (UART) ----------------
+constexpr int PIN_LORA_RX   = 13;  // ESP32 RX1 <- E220 TXD
+constexpr int PIN_LORA_TX   = 14;  // ESP32 TX1 -> E220 RXD
+constexpr int PIN_LORA_MODE = 0;   // E220 M0 + M1 together. High at reset (the DevKit's pull-up) = setup
+                                   // mode, which is where the firmware wants it first; low = normal
 
 // ---------------- Servo channels on the PCA9685 ----------------
 enum Joint : uint8_t { J_YAW = 0, J_SHOULDER, J_ELBOW, J_WRIST, J_GRIP, J_COUNT };
@@ -81,6 +88,8 @@ constexpr float RAMP_PER_S = 3.0f;          // max change of duty fraction per s
 // ---------------- Safety / arbitration ----------------
 constexpr uint32_t LINK_TIMEOUT_MS     = 300;   // no command for this long -> stop
 constexpr uint32_t MANUAL_OVERRIDE_MS  = 2000;  // manual input holds control this long
+constexpr uint32_t LORA_TIMEOUT_MS     = 700;   // the LoRa link sends at 10 Hz: stop after ~7 lost frames
+constexpr float    LORA_SPEED_SCALE    = 0.6f;  // top speed while driving over LoRa (more lag, less view)
 constexpr float BATT_LOW_PCT      = 30;   // agent switches to "seek sun / park"
 constexpr float BATT_CRIT_PCT     = 15;   // everything stops, Pi told to shut down
 constexpr float BATT_RESUME_PCT   = 60;   // wake the Pi again

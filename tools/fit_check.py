@@ -38,7 +38,7 @@ STATIC = (["deck_front", "deck_rear", "nose", "turret_base", "box_servo_yaw",
            "box_wago_gnd", "box_wago_main", "box_wago_5v",
            "box_esp_board", "box_pi", "box_mpu6050", "box_i2c_hub",
            "box_battery", "box_relay", "box_cn3795", "box_ina219_solar", "box_ina219_batt",
-           "box_wago_chg", "box_wago_pack"]
+           "box_wago_chg", "box_wago_pack", "cradle_e220", "box_e220", "box_antenna"]
           + [f"{p}_{c}" for p in ("clamp", "wheel", "tire", "disc", "box_motor") for c in CORNERS]
           + [f"post_{i}" for i in range(10)] + [f"standoff_{i}" for i in range(4)])
 # parts that turn with the turret, and those that also move with the arm
@@ -58,6 +58,7 @@ ALLOWED = {
 }
 # each driver board sits inside its cradle
 ALLOWED[("box_tb6612_a", "cradle_tb6612_a")] = "board in its cradle"
+ALLOWED[("box_e220", "cradle_e220")] = "board in its cradle"
 ALLOWED[("box_tb6612_b", "cradle_tb6612_b")] = "board in its cradle"
 ALLOWED[("box_mp1584", "cradle_mp1584")] = "board in its cradle"
 LIMIT_MM3 = 1.0
