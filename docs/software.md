@@ -56,6 +56,8 @@ Pairing also gives the remote the key for the **long-range LoRa link** (protocol
 - use the free **Adafruit Bluefruit Connect** app (Android and iPhone): connect to "SolarRover", then Controller → Control Pad; or
 - open the same app from GitHub Pages in Chrome on Android or a PC. This needs a public repo: Settings → Pages → deploy from branch `main`. The page is then at `https://<you>.github.io/solar-rover/firmware/car/web/`. iPhone Safari has no Web Bluetooth; use Bluefruit Connect there.
 
+**Changing the app or the website:** `node tools/app_check.js` opens both in a real browser at phone size, with a fake car on the other end of the WebSocket. It drives with the stick and the arrow keys, presses STOP, every mode and pose, drags the crane, feeds in low and critical battery readings, drops the link and checks every line the app sends. It also fails if anything scrolls sideways or a control is under 44 px. CI runs it on every push. Add `--shots` to redraw `docs/img/app.png`, `app-light.png` and `site.png`. It needs Node and Playwright once: `npm install --no-save playwright && npx playwright install chromium`.
+
 ## 4. Simulator and training (on your PC)
 
 ```bash

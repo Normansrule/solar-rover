@@ -24,7 +24,7 @@ p+p{margin-top:var(--s4)}
 .bar nav{display:flex;gap:var(--s5)}
 .bar nav a,.gh{font-weight:500;font-size:.9375rem;color:var(--ink-2);text-decoration:none;padding:var(--s2) 0}
 .bar nav a:hover,.gh:hover{color:var(--ink)}
-.theme{font:500 .875rem var(--text);color:var(--ink);background:var(--raised);border:0;border-radius:var(--r-s);min-height:36px;padding:0 var(--s3);cursor:pointer}
+.theme{font:500 .875rem var(--text);color:var(--ink);background:var(--raised);border:0;border-radius:var(--r-s);min-height:44px;padding:0 var(--s3);cursor:pointer}
 @media (max-width:760px){.bar nav{display:none}.bar{gap:var(--s4)}}
 
 /* ---------- buttons ---------- */

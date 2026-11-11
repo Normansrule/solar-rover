@@ -76,3 +76,16 @@ jobs:
         run: |
           g++ -std=c++17 -Wall -Werror -Ifirmware/common firmware/car/test/test_lora_link.cpp -o /tmp/tll
           /tmp/tll
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Phone app and website in a real browser, against a fake car
+        run: |
+          npm install --no-save --no-package-lock playwright@1.49.1
+          npx playwright install --with-deps chromium
+          node tools/app_check.js

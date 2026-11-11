@@ -11,3 +11,4 @@ MUJOCO_LOG.TXT
 sim/runs/
 *.zip
 agent/runs/
+node_modules/
