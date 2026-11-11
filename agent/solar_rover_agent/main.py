@@ -15,6 +15,7 @@ from .link import CarLink
 from .odometry import Odometry
 from .policy import Policy
 from .behaviours import Navigator
+from .runlog import RunLog
 
 HERE = pathlib.Path(__file__).resolve().parent.parent
 
@@ -36,6 +37,7 @@ def main(argv=None):
     ap.add_argument("--url", help="ws://solar-rover.local/ws to run from a PC over WiFi")
     ap.add_argument("--port")
     ap.add_argument("--dry-run", action="store_true", help="read telemetry, print actions, send nothing")
+    ap.add_argument("--log", help="record commands + telemetry here (JSON lines) for sim/solar_rover_sim/fit.py")
     a = ap.parse_args(argv)
     cfg = load_config(a.config)
     link = CarLink(port=a.port or cfg["port"], url=a.url)
@@ -47,6 +49,7 @@ def main(argv=None):
         from .pick import PickRoutine
         pick = PickRoutine(link, BlobFinder())
     odo = Odometry()
+    log = RunLog(a.log) if a.log else None
     period = 1.0 / cfg["rate_hz"]
     print(f"agent running: policy={cfg['policy']} ({policy.kind}), task={cfg.get('task')}")
     last = time.monotonic()
@@ -69,6 +72,8 @@ def main(argv=None):
                 time.sleep(period)            # a person is driving (or the car parked itself)
                 continue
             cmd = pick.step(tel) if pick and not tel.low else nav.step(tel, odo, dt)
+            if log:
+                log.write(tel, None if a.dry_run else cmd)
             if a.dry_run:
                 print(f"task={nav.task} cmd={cmd} bat={tel.bat_pct:.0f}% sol={tel.sol_mw:.0f}mW tof={tel.tof}")
             elif cmd is None:
@@ -80,6 +85,8 @@ def main(argv=None):
         pass
     finally:
         link.close()
+        if log:
+            log.close()
 
 
 if __name__ == "__main__":

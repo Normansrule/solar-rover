@@ -13,6 +13,7 @@
 #include "control.h"
 #include "links.h"
 #include "settings.h"
+#include "bringup.h"
 
 PowerState  gPower;
 SensorState gSensors;
@@ -89,6 +90,7 @@ void loop() {
 
     links::poll();
     control::update();
+    bringup::update(dt);
     drive::update(dt);
     arm::update(dt);
     sensors::update();

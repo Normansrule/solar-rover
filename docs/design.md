@@ -57,8 +57,8 @@ Solar 2x 6 V 2 W (series) ── SS54 ─┐
 
 ## RL agent
 
-- **Simulator:** a fast 2-D skid-steer simulator (`sim/`, Gymnasium API) with the car's size from the CAD, its speed limits, motor-strength and wheel-slip randomisation, sensor noise and obstacles. A MuJoCo 3-D model of the car and arm (`sim/models/solar_rover.xml`) is included for later arm work.
-- **Training:** Evolution Strategies, numpy only, on any PC. PPO from Stable-Baselines3 is an optional alternative.
+- **Simulator:** a fast 2-D skid-steer simulator (`sim/`, Gymnasium API) with the car's 36 × 20 cm footprint from the CAD, the time-of-flight sensor's 25° cone, its speed limits, motor-strength and wheel-slip randomisation, sensor noise and obstacles. A MuJoCo 3-D model of the car and arm (`sim/models/solar_rover.xml`) is included for later arm work.
+- **Training:** Evolution Strategies, numpy only, on any PC. PPO from Stable-Baselines3 is an optional alternative. `--as-deployed` trains with the car's speed limit and forward stop in the loop, so the policy learns the system that actually runs, and `solar_rover_sim.evaluate` scores it that way.
 - **Policy:** a 14-input, 2-output MLP. It reads the goal direction, wheel speeds, gyro, front distance, light and battery level, and outputs throttle and turn at 10 Hz. It ships as `.npz` and `.onnx`.
 - **Behaviours on the car:** waypoint navigation with the learned policy, sun seeking (a scripted search by default, since it did better in the sim), and an optional camera-based pick-up.
 
@@ -86,4 +86,4 @@ Solar 2x 6 V 2 W (series) ── SS54 ─┐
 - **MEASURE items** in `hardware/scad/config.scad`: the TT motor, the servos, the panels and the board hole patterns vary between suppliers. Measure them and re-export the STLs.
 - **Firmware:** the car and remote firmware compile cleanly (no warnings) with PlatformIO `espressif32@6.9.0` (Arduino core 2.0.17). The car uses 38% of flash and 18% of RAM. GitHub Actions rebuilds both on every push. They haven't run on real hardware yet.
 - **Long-range link:** the range is the vendor's figure scaled down for the 9.6 kbit/s air rate and stock antennas; measure it (software.md, "Range test"). The E220 pin behaviour at reset (M0/M1 inputs not pulling GPIO0 low) is from the datasheet: if the car ever boots into download mode with the radio fitted, move the M0/M1 jumper off GPIO0 to check.
-- **Policy:** trained in simulation only. Expect to retune `speed_scale` and the sim's motor numbers on the real car.
+- **Policy:** trained in simulation only. Once the car drives, record the `sysid` test pattern and fit the simulator to it (`solar_rover_sim.fit`, software.md section 4), then retrain. Until then the sim's motor lag, top speed and turning are estimates.

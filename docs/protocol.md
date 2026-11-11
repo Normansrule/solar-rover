@@ -38,6 +38,7 @@ Values are integers unless noted. Speeds run from −1000 to 1000 (= −100 % to
 | `LORA` | Long-range link status: `LORA ok US915 rssi=-92 last=0s` |
 | `LORA REGION <US\|EU>` | Radio region (frequency, power, duty cycle), saved in flash. Opens pairing for 60 s so the remote picks it up |
 | `LORA REKEY` | New random LoRa key (if the remote was lost). Opens pairing for 60 s |
+| `TEST WHEELS` | Bring-up check: runs each wheel alone and replies `TEST wheel <FL\|RL\|FR\|RR> <verdict>` per wheel, then `TEST done <n>/4 ok`. Car on the floor; `S` stops it. Not accepted from the remote or the agent. |
 | `RESTART` | Reboot the ESP32 |
 | `INFO` | Replies `solar-rover fw 0.1 mode=… ip=…` |
 

@@ -251,6 +251,7 @@ void sendTelemetry() {
 }
 
 void sendToPi(const char* line) { piSerial.println(line); }
+void send(Source to, const String& line) { reply(to, line); }
 
 void remoteInput(const RemotePacket& p, Source src) {
     if (src == Source::LORA && !lora::useLoraControl(millis(), lastEspNowMs, espNowSeen)) return;
