@@ -117,8 +117,11 @@ def car():
         ("Power in (expansion board 5V block)", [("5V", "5V lever connector", "pwr"), ("GND", "GND lever connector", "gnd")]),
         ("Passive I2C hub (one port per board)", [
             (g("SDA"), "SDA", "sda"), (g("SCL"), "SCL", "scl"), ("3V3", "VCC", "33"), ("GND", "GND", "gnd"),
-            ("@PCA9685 0x40", "", "sda"), ("@MPU-6050 0x68", "", "sda"), ("@VL53L0X 0x29", "", "sda"),
+            ("@PCA9685 0x40", "", "sda"), ("@MPU-6050 0x68", "", "sda"), ("@TCA9548A mux 0x70", "", "sda"),
             ("@INA219 batt 0x41", "", "sda"), ("@INA219 solar 0x44", "", "sda")]),
+        ("TCA9548A mux: 3x VL53L0X 0x29", [
+            ("@front, nose window", "SD0 / SC0", "sda"), ("@left corner pod", "SD1 / SC1", "sda"),
+            ("@right corner pod", "SD2 / SC2", "sda"), ("3V3", "VIN", "33"), ("GND", "GND", "gnd")]),
         ("Raspberry Pi Zero 2 W", [
             (g("PI_RX") + " (RX2)", "pin 8  GPIO14 TXD", "uart"), (g("PI_TX") + " (TX2)", "pin 10 GPIO15 RXD", "uart"),
             (g("PI_WAKE"), "pin 5  GPIO3", "sig"), ("@5.1 V rail", "pin 2  5V", "pwr"), ("GND", "pin 6  GND", "gnd")]),

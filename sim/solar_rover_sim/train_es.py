@@ -85,7 +85,7 @@ def main(argv=None):
     if args.crash_penalty is not None:
         params.crash_penalty = args.crash_penalty
     if args.as_deployed:
-        params.speed_scale, params.stop_tof = ON_CAR["speed_scale"], ON_CAR["stop_tof"]
+        params.speed_scale, params.stop_tof, params.side_slow = ON_CAR["speed_scale"], ON_CAR["stop_tof"], ON_CAR["side_slow"]
     if args.params:
         print(f"simulator fitted to the real car: tau={params.tau} v_max={params.v_max} "
               f"turn_eff={params.turn_eff} strength={params.strength}")

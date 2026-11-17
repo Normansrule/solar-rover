@@ -76,8 +76,9 @@ void setup() {
     control::begin();
     links::begin();
     drive::enable(true);
-    Serial.printf("Solar Rover ready. arm=%s imu=%s tof=%s\n", armOk ? "ok" : "MISSING",
-                  gSensors.imu_ok ? "ok" : "MISSING", gSensors.tof_ok ? "ok" : "MISSING");
+    Serial.printf("Solar Rover ready. arm=%s imu=%s tof=%s corners=%s/%s\n", armOk ? "ok" : "MISSING",
+                  gSensors.imu_ok ? "ok" : "MISSING", gSensors.tof_ok ? "ok" : "MISSING",
+                  gSensors.side_ok[0] ? "ok" : "-", gSensors.side_ok[1] ? "ok" : "-");
     Serial.println("Type INFO, or see docs/protocol.md for commands.");
     lastUs = micros();
 }

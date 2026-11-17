@@ -3,6 +3,7 @@ port: /dev/serial0          # Pi UART wired to the ESP32 (docs/wiring.md)
 policy: models/drive.npz    # trained in sim/ (python -m solar_rover_sim.train_es)
 rate_hz: 10                 # must match the simulator step (0.1 s)
 speed_scale: 0.7            # extra safety margin on top of the policy
+side_slow_mm: 300           # front-corner sensors: slow and turn away under this (0 = off)
 task: navigate              # navigate | pick
 sun_mode: scripted          # scripted (run-and-tumble search) | policy (learned)
 # Waypoints in metres, in the odometry frame (origin = where the agent started,

@@ -47,8 +47,8 @@ Plug the DevKit into the **38-pin screw-terminal expansion board**. Every GPIO t
 |---|---|---|
 | 5V terminal on the expansion board | 5.1 V rail (MP1584 OUT+) | Power in. Don't also plug in USB with the battery on unless the DevKit has a VIN diode (most do). |
 | GND | GND bus | Use at least two GND wires. |
-| 3V3 | 3.3 V pins on the expansion board and the I2C hub | Feeds PCA9685 VCC, TB6612 VCC ×2, MPU-6050, VL53L0X, INA219 ×2, LM393 ×4, the DS18B20 (about 60 mA total) and the E220 radio (110 mA peaks while sending). |
-| GPIO21 | I2C hub SDA | PCA9685, MPU-6050, VL53L0X and INA219 ×2 each plug into one hub port |
+| 3V3 | 3.3 V pins on the expansion board and the I2C hub | Feeds PCA9685 VCC, TB6612 VCC ×2, MPU-6050, TCA9548A + VL53L0X ×3, INA219 ×2, LM393 ×4, the DS18B20 (about 60 mA total) and the E220 radio (110 mA peaks while sending). |
+| GPIO21 | I2C hub SDA | PCA9685, MPU-6050, TCA9548A (with the three VL53L0X behind it) and INA219 ×2 each plug into one hub port |
 | GPIO22 | I2C hub SCL | same |
 | GPIO16 (RX2) | Pi header pin 8 (GPIO14 TXD) | UART 115200 8N1 |
 | GPIO17 (TX2) | Pi header pin 10 (GPIO15 RXD) | |
@@ -110,13 +110,18 @@ Screw the antenna on **before** powering up: sending at 22 dBm with no antenna c
 
 ## 4. Sensors and servo board (I2C, 3.3 V)
 
-The five I2C boards share one bus through a **passive I2C hub**: a small board whose ports are all wired in parallel, with no chip on it. Do not use a TCA9548A multiplexer board. Run one 4-wire female-female jumper from the expansion board's I2C header (3V3, GND, SDA, SCL) to the hub, then one 4-wire jumper from the hub to each module.
+The five I2C boards share one bus through a **passive I2C hub**: a small board whose ports are all wired in parallel, with no chip on it. The hub is not a multiplexer: the PCA9685, MPU-6050, both INA219s and the TCA9548A each take one hub port. Run one 4-wire female-female jumper from the expansion board's I2C header (3V3, GND, SDA, SCL) to the hub, then one 4-wire jumper from the hub to each module.
+
+The three VL53L0X distance sensors all have the fixed address 0x29, so they go **behind the TCA9548A multiplexer**, one per channel: each gets a 4-wire jumper (VIN, GND, SDA, SCL) from the mux's own SDn/SCn pair, with VIN and GND from the mux's VIN/GND pins. The corner sensors' leads go through the slot under each pod into the nose, then with the front sensor's lead out of the opening in the nose's back. No mux? One front sensor on a hub port still works; the corner guard is then off.
 
 | Module | VCC | GND | SDA | SCL | Address | Other pins |
 |---|---|---|---|---|---|---|
 | PCA9685 16-ch servo board | 3V3 | GND | 21 | 22 | 0x40 | V+ screw terminal ← 6.0 V rail; OE → GND or leave open |
 | MPU-6050 (GY-521) | 3V3 | GND | 21 | 22 | 0x68 | AD0 → GND; INT unused |
-| VL53L0X (GY-VL53L0XV2) | 3V3 (VIN) | GND | 21 | 22 | 0x29 | XSHUT and GPIO1 unused |
+| TCA9548A multiplexer | 3V3 (VIN) | GND | 21 | 22 | 0x70 (A0–A2 open) | RST unused (pulled up on the module) |
+| VL53L0X front (GY-VL53L0XV2) | mux VIN | mux GND | SD0 | SC0 | 0x29 | XSHUT and GPIO1 unused |
+| VL53L0X left corner | mux VIN | mux GND | SD1 | SC1 | 0x29 | as above |
+| VL53L0X right corner | mux VIN | mux GND | SD2 | SC2 | 0x29 | as above |
 | INA219 "batt" | 3V3 | GND | 21 | 22 | **0x41**: bridge the A0 pads | VIN+ ← CN3795 BAT+; VIN− → pack + (BMS P+) |
 | INA219 "solar" | 3V3 | GND | 21 | 22 | **0x44**: bridge the A1 pads | VIN+ ← solar +; VIN− → SS54 diode D1 anode |
 

@@ -3,14 +3,17 @@
 #pragma once
 #include <Arduino.h>
 
-// ---------------- I2C bus (PCA9685, MPU-6050, VL53L0X, 2x INA219) ----------------
+// ---------------- I2C bus (PCA9685, MPU-6050, 2x INA219, TCA9548A + 3x VL53L0X) ----------------
 constexpr int PIN_SDA = 21;
 constexpr int PIN_SCL = 22;
 constexpr uint8_t ADDR_PCA9685   = 0x40;
 constexpr uint8_t ADDR_INA_BATT  = 0x41;   // A0 bridged
 constexpr uint8_t ADDR_INA_SOLAR = 0x44;   // A1 bridged
 constexpr uint8_t ADDR_MPU6050   = 0x68;
-// VL53L0X is 0x29 (fixed default)
+// VL53L0X is 0x29 (fixed default). With the corner sensors fitted all three sit
+// behind a TCA9548A I2C mux, one per channel, so they can all keep 0x29.
+constexpr uint8_t ADDR_TCA9548A  = 0x70;   // A0-A2 open
+constexpr uint8_t TOF_CH_FRONT = 0, TOF_CH_LEFT = 1, TOF_CH_RIGHT = 2;   // mux channels SD0/SC0..SD2/SC2
 
 // ---------------- UART to the Raspberry Pi (agent) ----------------
 constexpr int PIN_PI_RX = 16;   // ESP32 RX2  <- Pi GPIO14 (TXD, header pin 8)

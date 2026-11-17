@@ -44,7 +44,8 @@ This is every bought electronic module: what it does in the car, the key specs, 
 | Module | Job | Key specs |
 |---|---|---|
 | **MPU-6050 (GY-521)** | Yaw rate for odometry and the policy; tilt. | 0x68, ±250 °/s, ±2 g, 100 Hz. Keep the car still for 1 s after power-on: the firmware measures gyro bias then. |
-| **VL53L0X** | Forward distance (obstacles, approaching objects). | 0x29, up to ≈ 2 m indoors, 20 Hz. Sits behind the Ø9 mm window in the nose. |
+| **VL53L0X** ×3 | Distance: one straight ahead (obstacles, approaching objects) and one in each front corner of the nose, aimed 70° out, so the agent sees a corner about to clip something. | 0x29 each (fixed), up to ≈ 2 m indoors, 20 Hz, ±12.5° cone. Front one behind the Ø9 mm nose window; corner ones screwed onto the nose's corner pods. |
+| **TCA9548A** I2C multiplexer | Lets three sensors with the same address share the bus: each gets its own channel. | 0x70 (A0–A2 open). Front on SD0/SC0, left on SD1/SC1, right on SD2/SC2. Without it the firmware runs one front sensor on the main bus, as before. |
 | **INA219** ×2 | "solar": panel voltage and power, which is also the agent's light sensor. "batt": pack voltage and charge current. | 0.1 Ω shunt, 3.2 A max, 26 V max bus. Addresses set by solder pads (0x44 solar, 0x41 batt). |
 | **DS18B20 waterproof probe + adapter module** | Pack temperature for the charge cut-off. | Get the probe with the little screw-terminal adapter board, which has the 4.7 kΩ pull-up. Power at 3.3 V. Charging is blocked outside 0–45 °C, with 3 °C hysteresis. A missing or unplugged probe counts as a fault and also blocks charging. |
 

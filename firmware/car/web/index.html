@@ -169,6 +169,7 @@ input::placeholder{color:var(--ink-2);opacity:1}
       <h2 style="margin-top:var(--s5)">Sensors</h2>
       <dl style="margin-top:0">
         <div><dt>Ahead</dt><dd id="tof">--</dd></div>
+        <div id="sideRow" hidden><dt>Corners, left · right</dt><dd id="side">--</dd></div>
         <div><dt>Speed</dt><dd id="spd">--</dd></div>
         <div><dt>Turn rate</dt><dd id="yawr">--</dd></div>
       </dl>
@@ -266,7 +267,10 @@ input::placeholder{color:var(--ink-2);opacity:1}
     $('sol').textContent = (t.sol_mw / 1000).toFixed(2) + ' W';
     $('cur').textContent = Math.round(t.chg_ma) + ' mA';
     $('temp').textContent = t.temp_c.toFixed(0) + ' °C';
-    $('tof').textContent = t.tof < 0 ? 'clear' : (t.tof / 10).toFixed(0) + ' cm';
+    const cm = mm => mm < 0 ? 'clear' : (mm / 10).toFixed(0) + ' cm';
+    $('tof').textContent = cm(t.tof);
+    $('sideRow').hidden = !t.side;   // older firmware sends no corner readings
+    if (t.side) $('side').textContent = cm(t.side[0]) + ' · ' + cm(t.side[1]);
     const v = (t.spd[0] + t.spd[1] + t.spd[2] + t.spd[3]) / 4;
     $('spd').textContent = (v / 1000).toFixed(2) + ' m/s';
     $('yawr').textContent = t.imu[5].toFixed(0) + ' °/s';
