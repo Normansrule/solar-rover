@@ -53,6 +53,7 @@ Solar 2x 6 V 2 W (series) ── SS54 ─┐
 - **Raspberry Pi Zero 2 W** runs the agent and talks to the ESP32 over UART. It's optional: the same agent runs on a PC over WiFi.
 - **Links:** handheld ESP-NOW remote, phone web app over WiFi, Bluetooth LE (Nordic UART), and UART to the Pi. They all use one text protocol ([protocol.md](protocol.md)).
 - **Long range:** an E220 LoRa radio in the car and in the remote. The remote switches to it by itself when ESP-NOW stops getting through (about 100 m) and back when ESP-NOW returns, so the same remote drives the car out to 1–3 km in the open (*est.*), at 60 % top speed. Frames are signed and can't be replayed, the watchdog still stops the car if LoRa goes quiet for 700 ms, and an airtime budget keeps to each region's duty-cycle rule (protocol.md, "Long-range link").
+- **Obstacle assist** (manual driving only): the ESP32 caps forward speed so the car can still stop 6 cm short of what the front sensor sees, assuming 0.1 s of lag and 1 m/s² of braking, and does the same for a corner sensor on the side you're turning toward. At 30 cm it allows full speed, at 15 cm about half. It never steers. The app has an on/off button (`ASSIST`); it's on at every boot. The agent has its own guards instead, the ones the simulator trains against.
 - **Priority:** low-battery override first, then manual input, then the agent. In `auto` mode any manual input takes over for 2 s. If the driving link goes quiet for 300 ms, the motors stop.
 
 ## RL agent

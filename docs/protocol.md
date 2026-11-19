@@ -40,6 +40,7 @@ Values are integers unless noted. Speeds run from −1000 to 1000 (= −100 % to
 | `LORA REKEY` | New random LoRa key (if the remote was lost). Opens pairing for 60 s |
 | `TEST WHEELS` | Bring-up check: runs each wheel alone and replies `TEST wheel <FL\|RL\|FR\|RR> <verdict>` per wheel, then `TEST done <n>/4 ok`. Car on the floor; `S` stops it. Not accepted from the remote or the agent. |
 | `RESTART` | Reboot the ESP32 |
+| `ASSIST` / `ASSIST ON` / `ASSIST OFF` | Obstacle assist for manual driving (on at every boot): caps forward speed so the car can still stop 6 cm short of what the front sensor sees, and of what a corner sensor sees on the side you're turning toward. Never steers, never touches reverse or turning on the spot. Not from the agent link. Replies `ASSIST on` or `ASSIST off`. |
 | `INFO` | Replies `solar-rover fw 0.1 mode=… ip=… tof=ok corners=ok/ok mux` (which distance sensors answered) |
 
 Errors come back as `ERR <reason>`, for example `ERR mode` when the current mode doesn't let that link drive.
@@ -69,7 +70,7 @@ The car sends one JSON line at 20 Hz on the UART and 10 Hz to WebSocket and BLE 
  "bat_v":7.86,"bat_pct":72,"chg_ma":310,"sol_v":11.2,"sol_mw":3450,
  "temp_c":24.5,"chg":"solar","low":0,"crit":0,
  "enc":[1020,1018,995,1001],"spd":[210,205,198,202],
- "imu":[0.012,-0.004,0.998,0.4,-0.2,12.5],"tof":640,"side":[310,-1],
+ "imu":[0.012,-0.004,0.998,0.4,-0.2,12.5],"tof":640,"side":[310,-1],"ast":1,
  "arm":[0.0,45.0,60.0,-10.0,60]}
 ```
 
@@ -85,6 +86,7 @@ The car sends one JSON line at 20 Hz on the UART and 10 Hz to WebSocket and BLE 
 | `imu` | ax, ay, az in g; gx, gy, gz in °/s |
 | `tof` | Front distance in mm (−1 = nothing within 2 m) |
 | `side` | Left and right front-corner distances in mm, each sensor aimed 70° out (−1 = nothing within 2 m, or not fitted) |
+| `ast` | Obstacle assist: 0 off, 1 on, 2 slowing the car right now |
 | `arm` | Joint angles in degrees: yaw, shoulder, elbow, wrist, grip % |
 
 `lr` (at the end of every line) is the long-range link: `[module ok 0/1, RSSI of the last frame in dBm (0 = none yet), ms since that frame (999999 = never)]`, for example `"lr":[1,-92,40]`. `src` is `lora` while the remote drives over LoRa.

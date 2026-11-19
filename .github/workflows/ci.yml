@@ -26,6 +26,11 @@ jobs:
         run: |
           g++ -std=c++17 -Wall -Werror -Ifirmware/car/src firmware/car/test/test_wheel_check.cpp -o /tmp/twc
           /tmp/twc
+      - name: Obstacle assist for manual driving (runs on the PC)
+        if: matrix.project == 'car'
+        run: |
+          g++ -std=c++17 -Wall -Werror -Ifirmware/car/src firmware/car/test/test_assist.cpp -o /tmp/tas
+          /tmp/tas
 
   python:
     runs-on: ubuntu-latest

@@ -33,6 +33,7 @@ struct DriveState {
     float speed_mm_s[4] = {0, 0, 0, 0};
     float duty[4] = {0, 0, 0, 0};
     float cmd_left = 0, cmd_right = 0;  // -1..1
+    uint8_t assist = 1;                 // obstacle assist for manual driving: 0 off, 1 on, 2 slowing the car now
 };
 
 extern PowerState  gPower;

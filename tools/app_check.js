@@ -23,7 +23,7 @@ const TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascrip
 // One telemetry line as firmware/car/src/telemetry.cpp writes it.
 const TEL = {
   bat_pct: 72, bat_v: 7.86, chg: 'solar', sol_mw: 3420, chg_ma: 410, temp_c: 24, tof: 820,
-  spd: [210, 205, 215, 200], imu: [0, 0, 9.8, 0, 0, 12], side: [310, -1], src: 'APP', ovr: false, mode: 'manual',
+  spd: [210, 205, 215, 200], imu: [0, 0, 9.8, 0, 0, 12], side: [310, -1], ast: 1, src: 'APP', ovr: false, mode: 'manual',
   arm: [0, 60, 120, 90, 0], low: false, crit: false,
 };
 
@@ -134,6 +134,18 @@ async function main() {
     await until(() => page.locator('#sideRow').isHidden(), 'the corner row stayed up');
     car.tel();
     await until(() => page.locator('#sideRow').isVisible(), 'the corner row did not come back');
+  });
+  await check('obstacle assist: shows when it slows the car, and the button turns it off and on', async () => {
+    car.tel({ ast: 2, tof: 140 });
+    await until(async () => (await text(page, '#assistHint')).startsWith('Slowing down'), 'no "slowing down" note');
+    car.tel(); car.clear();
+    await until(async () => !(await text(page, '#assistHint')).startsWith('Slowing'), 'the note stayed after it cleared');
+    await page.click('#assist');
+    await until(() => car.lines().includes('ASSIST OFF'), 'the button sent no ASSIST OFF');
+    expect((await page.locator('#assist').getAttribute('aria-pressed')) === 'false', 'the button still looks on');
+    car.tel({ ast: 0 }); await page.click('#assist');
+    await until(() => car.lines().includes('ASSIST ON'), 'the button sent no ASSIST ON');
+    car.tel();
   });
   await check('arrow keys drive: forward, then a stop when released', async () => {
     await page.locator('#pad').focus(); car.clear();

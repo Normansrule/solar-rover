@@ -49,7 +49,7 @@ Pairing also gives the remote the key for the **long-range LoRa link** (protocol
 
 1. On the phone, join WiFi **SolarRover-XXXX**, password `solarrover123`.
 2. Open **http://192.168.4.1**. The app connects by itself.
-3. The stick drives (arrow keys or WASD work on a keyboard). In the crane view, drag to where you want the gripper and the arm works out its own joint angles, or tap a pose. **STOP**, or Escape on a keyboard, stops everything.
+3. The stick drives (arrow keys or WASD work on a keyboard). **Obstacle assist** is on by default: the car slows on its own as it gets close to something ahead and the app says so under the stick. Tap **Obstacle assist on** to turn it off, for pushing a ball or nudging into a charging spot. In the crane view, drag to where you want the gripper and the arm works out its own joint angles, or tap a pose. **STOP**, or Escape on a keyboard, stops everything.
 4. To use your home WiFi instead, enter it under "Put the car on your home WiFi" in the app and tap **Save and restart**. The car then also appears at **http://solar-rover.local** (or the IP shown in the app) on your home network. Its own `SolarRover-XXXX` network stays on as a fallback.
 
 **Bluetooth:** browsers only allow Bluetooth on an `https://` page, and the car serves its app over plain `http://`. So for Bluetooth, either:
