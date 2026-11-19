@@ -17,6 +17,8 @@ bool grip(Source s, float pct);
 void stop(Source s);                              // always accepted
 void heartbeat(Source s);
 void setMode(Source s, Mode m);
+void setAssist(bool on);                          // obstacle assist for manual driving (assist.h), on at boot
+bool assistOn();
 
 Mode mode();
 Source driver();          // source currently driving (NONE when idle)

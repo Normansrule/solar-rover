@@ -59,6 +59,10 @@ class CarParams:
     # won't drive forward under stop_tof (behaviours.py). 1.0 / 0.0 = bare policy.
     speed_scale: float = 1.0
     stop_tof: float = 0.0
+    # two more VL53L0X on the front corners, aimed side_tof_deg out from straight
+    # ahead (0 = not fitted). With side_slow > 0 the side guard runs (side_guard()).
+    side_tof_deg: float = 70.0
+    side_slow: float = 0.0
 
     @classmethod
     def load(cls, path: str) -> "CarParams":
@@ -161,10 +165,28 @@ class SolarRoverEnv(_Base):
             return self._ray(s.th)
         return min(self._ray(s.th + k * half) for k in (-1.0, -0.5, 0.0, 0.5, 1.0))
 
-    def _ray(self, th: float) -> float:
+    def side_tofs(self) -> tuple[float, float]:
+        """(left, right) readings of the corner sensors, same cone model as _tof."""
         p, s = self.p, self.s
-        ox = s.x + math.cos(s.th) * 0.15
-        oy = s.y + math.sin(s.th) * 0.15
+        if p.side_tof_deg <= 0:
+            return p.tof_max, p.tof_max
+        half = math.radians(p.tof_fov_deg) / 2
+        out = []
+        for side in (1, -1):                       # left corner, right corner
+            fx, fy = 0.15, side * 0.09             # sensor in the car frame, m
+            ox = s.x + math.cos(s.th) * fx - math.sin(s.th) * fy
+            oy = s.y + math.sin(s.th) * fx + math.cos(s.th) * fy
+            th = s.th + side * math.radians(p.side_tof_deg)
+            out.append(min(self._ray(th + k * half, (ox, oy)) for k in (-1.0, -0.5, 0.0, 0.5, 1.0)))
+        return out[0], out[1]
+
+    def _ray(self, th: float, origin=None) -> float:
+        p, s = self.p, self.s
+        if origin is None:
+            ox = s.x + math.cos(s.th) * 0.15
+            oy = s.y + math.sin(s.th) * 0.15
+        else:
+            ox, oy = origin
         dx, dy = math.cos(th), math.sin(th)
         best = p.tof_max
         # obstacles (circles)
@@ -240,6 +262,8 @@ class SolarRoverEnv(_Base):
         p, s = self.p, self.s
         a = np.clip(np.asarray(action, dtype=float), -1, 1)
         u = a
+        if p.side_slow > 0:
+            u = side_guard(u, *self.side_tofs(), p.side_slow)
         if p.stop_tof > 0 and a[0] + a[1] > 0 and self._tof() < p.stop_tof:
             u = a - 0.5 * (a[0] + a[1])
         u = u * p.speed_scale
@@ -288,6 +312,22 @@ class SolarRoverEnv(_Base):
         self.prev_action = a
         info = {"task": self.task, "collided": collided, "light": lit, "goal_dist": self._goal_dist()}
         return self._obs(), float(reward), terminated, truncated, info
+
+
+def side_guard(act, left_m: float, right_m: float, slow_m: float):
+    """Something close on a front corner while driving forward: slow down in
+    proportion to how close it is, and if the policy isn't already turning away,
+    turn away. Same rule as agent/solar_rover_agent/safety.py (a test checks)."""
+    a = np.asarray(act, dtype=float)
+    fwd, turn = 0.5 * (a[0] + a[1]), 0.5 * (a[1] - a[0])   # turn > 0 = left
+    near = min(left_m, right_m)
+    if fwd <= 0 or near >= slow_m:
+        return a
+    away = -1.0 if left_m < right_m else 1.0
+    fwd *= max(near, 0.0) / slow_m
+    if turn * away <= 0:
+        turn = 0.4 * away
+    return np.array([fwd - turn, fwd + turn])
 
 
 def build_obs(*, goal_bx, goal_by, goal_dist, v_left, v_right, yaw_rate, tof_m, batt,

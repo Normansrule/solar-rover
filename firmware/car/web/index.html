@@ -56,6 +56,9 @@ button:active{transform:scale(.97);background:var(--raised-2)}
 button.primary{background:var(--hazard);color:var(--on-hazard)}
 .row{display:flex;gap:var(--s2)}
 .row>*{flex:1}
+.assist{display:flex;align-items:center;gap:var(--s3);margin-top:var(--s3)}
+.assist button{flex:none}.assist .hint{margin:0}
+.assist .hint.on{color:var(--warn)}
 .seg{display:flex;gap:var(--s1);padding:var(--s1);background:var(--raised);border-radius:14px}
 .seg>button{flex:1;min-height:40px;background:transparent;border-radius:10px;padding:var(--s2) var(--s1)}
 .seg>button:active{background:var(--raised-2)}
@@ -133,6 +136,10 @@ input::placeholder{color:var(--ink-2);opacity:1}
       <div class="seg" role="group" aria-label="Top speed">
         <button id="slow" class="sel" aria-pressed="true">Slow</button><button id="fast" aria-pressed="false">Fast</button>
       </div>
+      <div class="assist">
+        <button id="assist" class="sel" aria-pressed="true" aria-describedby="assistHint">Obstacle assist on</button>
+        <p class="hint" id="assistHint" role="status" aria-live="polite">Slows the car before it reaches something ahead.</p>
+      </div>
     </section>
     <section id="p-crane" aria-labelledby="hCrane">
       <div class="sub"><h2 id="hCrane">Crane</h2><span class="hint">Drag to place the gripper</span></div>
@@ -169,6 +176,7 @@ input::placeholder{color:var(--ink-2);opacity:1}
       <h2 style="margin-top:var(--s5)">Sensors</h2>
       <dl style="margin-top:0">
         <div><dt>Ahead</dt><dd id="tof">--</dd></div>
+        <div id="sideRow" hidden><dt>Corners, left · right</dt><dd id="side">--</dd></div>
         <div><dt>Speed</dt><dd id="spd">--</dd></div>
         <div><dt>Turn rate</dt><dd id="yawr">--</dd></div>
       </dl>
@@ -266,7 +274,11 @@ input::placeholder{color:var(--ink-2);opacity:1}
     $('sol').textContent = (t.sol_mw / 1000).toFixed(2) + ' W';
     $('cur').textContent = Math.round(t.chg_ma) + ' mA';
     $('temp').textContent = t.temp_c.toFixed(0) + ' °C';
-    $('tof').textContent = t.tof < 0 ? 'clear' : (t.tof / 10).toFixed(0) + ' cm';
+    const cm = mm => mm < 0 ? 'clear' : (mm / 10).toFixed(0) + ' cm';
+    $('tof').textContent = cm(t.tof);
+    $('sideRow').hidden = !t.side;   // older firmware sends no corner readings
+    if (t.side) $('side').textContent = cm(t.side[0]) + ' · ' + cm(t.side[1]);
+    if (t.ast !== undefined) showAssist(t.ast);
     const v = (t.spd[0] + t.spd[1] + t.spd[2] + t.spd[3]) / 4;
     $('spd').textContent = (v / 1000).toFixed(2) + ' m/s';
     $('yawr').textContent = t.imu[5].toFixed(0) + ' °/s';
@@ -355,6 +367,18 @@ input::placeholder{color:var(--ink-2);opacity:1}
     if (Date.now() - lastYaw > 100) { lastYaw = Date.now(); send(`A ${e.target.value} * * * *`); }
   });
   $('yaw').addEventListener('change', e => send(`A ${e.target.value} * * * *`));
+
+  // ---------- obstacle assist (firmware/car/src/assist.h) ----------
+  let assistOn = true;
+  function showAssist(a) {
+    assistOn = a > 0; mark($('assist'), assistOn);
+    $('assist').textContent = assistOn ? 'Obstacle assist on' : 'Obstacle assist off';
+    const h = $('assistHint');
+    h.classList.toggle('on', a === 2);
+    h.textContent = a === 2 ? 'Slowing down: something close ahead.'
+      : assistOn ? 'Slows the car before it reaches something ahead.' : 'Off: nothing slows the car near obstacles.';
+  }
+  $('assist').onclick = () => { send(assistOn ? 'ASSIST OFF' : 'ASSIST ON'); showAssist(assistOn ? 0 : 1); };
 
   // ---------- buttons ----------
   $('stop').onclick = () => send('S');

@@ -2,6 +2,7 @@
 #include "drive.h"
 #include "arm.h"
 #include "bringup.h"
+#include "assist.h"
 
 namespace {
 Mode curMode = Mode::AUTO;
@@ -10,6 +11,20 @@ uint32_t lastSeen[(int)Source::COUNT] = {0};
 uint32_t lastManualMs = 0;
 uint32_t lastDriveMs = 0;
 bool critHandled = false;
+bool assist = true;
+float manCmd[2] = {0, 0};      // the manual driver's own command, before the assist
+
+// manual sources get the obstacle assist; the agent has its own guards
+void applyDrive(Source s, float l, float r) {
+    bool manual = s != Source::AGENT && s != Source::NONE;
+    if (!manual || !assist) { drive::set(l, r); gDrive.assist = assist ? 1 : 0; return; }
+    manCmd[0] = l; manCmd[1] = r;
+    const SensorState& z = gSensors;
+    AssistOut o = assistLimit(l, r, z.tof_ok ? z.tof_mm : -1, z.side_ok[0] ? z.side_mm[0] : -1,
+                              z.side_ok[1] ? z.side_mm[1] : -1, MAX_WHEEL_MM_S);
+    drive::set(o.left, o.right);
+    gDrive.assist = o.limiting ? 2 : 1;
+}
 
 bool isManual(Source s) { return s != Source::AGENT && s != Source::NONE; }
 uint32_t timeoutFor(Source s) { return s == Source::LORA ? LORA_TIMEOUT_MS : LINK_TIMEOUT_MS; }
@@ -57,7 +72,7 @@ bool drive(Source s, float l, float r) {
     touch(s, active);
     if (!allowed(s)) return false;
     if (!active && owner != s && owner != Source::NONE) return true;   // idle input never steals control
-    drive::set(l, r);
+    applyDrive(s, l, r);
     owner = active ? s : (owner == s ? Source::NONE : owner);
     lastDriveMs = millis();
     return true;
@@ -100,6 +115,9 @@ void setMode(Source s, Mode m) {
     owner = Source::NONE;
 }
 
+void setAssist(bool on) { assist = on; gDrive.assist = on ? 1 : 0; }
+bool assistOn() { return assist; }
+
 Mode mode() { return curMode; }
 Source driver() { return owner; }
 bool manualOverrideActive() { return curMode == Mode::AUTO && millis() - lastManualMs < MANUAL_OVERRIDE_MS && lastManualMs != 0; }
@@ -112,6 +130,9 @@ void update() {
         owner = Source::NONE;
     }
     if (owner == Source::NONE && now - lastDriveMs > LINK_TIMEOUT_MS) drive::stop();
+    // the obstacle can come closer between two commands: re-check the manual command every loop
+    if (owner != Source::NONE && owner != Source::AGENT && assist) applyDrive(owner, manCmd[0], manCmd[1]);
+    else if (owner == Source::NONE) gDrive.assist = assist ? 1 : 0;
     // battery critical: stop, fold the arm, then let it go limp
     if (gPower.critical && !critHandled) {
         drive::stop();

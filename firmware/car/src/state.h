@@ -21,8 +21,11 @@ struct PowerState {
 struct SensorState {
     float ax = 0, ay = 0, az = 0;   // g
     float gx = 0, gy = 0, gz = 0;   // deg/s (bias removed)
-    int   tof_mm = -1;              // -1 = no reading
+    int   tof_mm = -1;              // front distance, -1 = no reading
+    int   side_mm[2] = {-1, -1};    // left and right front-corner sensors, -1 = no reading / not fitted
     bool  imu_ok = false, tof_ok = false;
+    bool  side_ok[2] = {false, false};
+    bool  tof_mux = false;          // the three sensors sit behind the TCA9548A
 };
 
 struct DriveState {
@@ -30,6 +33,7 @@ struct DriveState {
     float speed_mm_s[4] = {0, 0, 0, 0};
     float duty[4] = {0, 0, 0, 0};
     float cmd_left = 0, cmd_right = 0;  // -1..1
+    uint8_t assist = 1;                 // obstacle assist for manual driving: 0 off, 1 on, 2 slowing the car now
 };
 
 extern PowerState  gPower;

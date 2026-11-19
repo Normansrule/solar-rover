@@ -42,7 +42,8 @@ def main(argv=None):
     cfg = load_config(a.config)
     link = CarLink(port=a.port or cfg["port"], url=a.url)
     policy = Policy(cfg["policy"])
-    nav = Navigator(policy, cfg["waypoints"], speed_scale=cfg["speed_scale"], sun_mode=cfg.get("sun_mode", "scripted"))
+    nav = Navigator(policy, cfg["waypoints"], speed_scale=cfg["speed_scale"], side_slow_mm=cfg.get("side_slow_mm", 300),
+                    sun_mode=cfg.get("sun_mode", "scripted"))
     pick = None
     if cfg.get("task") == "pick":
         from .vision import BlobFinder
@@ -75,7 +76,7 @@ def main(argv=None):
             if log:
                 log.write(tel, None if a.dry_run else cmd)
             if a.dry_run:
-                print(f"task={nav.task} cmd={cmd} bat={tel.bat_pct:.0f}% sol={tel.sol_mw:.0f}mW tof={tel.tof}")
+                print(f"task={nav.task} cmd={cmd} bat={tel.bat_pct:.0f}% sol={tel.sol_mw:.0f}mW tof={tel.tof} side={tel.side}")
             elif cmd is None:
                 link.send("H")
             else:

@@ -7,13 +7,15 @@ import time
 import numpy as np
 
 from .observation import from_telemetry
+from .safety import side_guard, side_m
 
 
 class Navigator:
     """Runs the trained policy toward waypoints, or toward sunlight when the
     battery is low, and parks once it has found a sunny spot."""
 
-    def __init__(self, policy, waypoints, speed_scale=0.7, stop_tof_mm=130, park_after_s=20.0, sun_mode="scripted"):
+    def __init__(self, policy, waypoints, speed_scale=0.7, stop_tof_mm=130, side_slow_mm=300, park_after_s=20.0,
+                 sun_mode="scripted"):
         self.policy = policy
         self.sun_mode = sun_mode
         self.sun = SunSeeker()
@@ -21,6 +23,7 @@ class Navigator:
         self.wp = 0
         self.speed_scale = speed_scale
         self.stop_tof_mm = stop_tof_mm
+        self.side_slow_mm = side_slow_mm
         self.park_after_s = park_after_s
         self.prev_action = np.zeros(2)
         self.prev_solar = 0.0
@@ -48,7 +51,9 @@ class Navigator:
             l, r = self.sun.step(tel.sol_mw / 1000.0, odo.x, odo.y, odo.th, math.radians(tel.imu[5]), tof, dt)
             if self.sun.parked:
                 self.parked = True
-            return l * self.speed_scale / 0.7, r * self.speed_scale / 0.7
+            if self.side_slow_mm > 0:
+                l, r = side_guard((l, r), *side_m(tel), self.side_slow_mm / 1000.0)
+            return float(l) * self.speed_scale / 0.7, float(r) * self.speed_scale / 0.7
         goal = self.waypoints[self.wp] if task == "goal" else None
         if goal and math.hypot(goal[0] - odo.x, goal[1] - odo.y) < 0.15:
             self.wp = (self.wp + 1) % len(self.waypoints)
@@ -58,6 +63,9 @@ class Navigator:
         self.prev_action = act
         self.prev_solar = tel.sol_mw / 1000.0
 
+        # safety: slow and turn away from something close on a front corner
+        if self.side_slow_mm > 0:
+            act = side_guard(act, *side_m(tel), self.side_slow_mm / 1000.0)
         # safety: never drive forward into something right in front of the sensor
         if 0 <= tel.tof < self.stop_tof_mm and act[0] + act[1] > 0:
             fwd = 0.5 * (act[0] + act[1])

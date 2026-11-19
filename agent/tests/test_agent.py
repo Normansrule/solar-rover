@@ -64,6 +64,18 @@ def test_navigator_blocks_forward_into_obstacle():
     assert l + r <= 1e-9
 
 
+def test_navigator_turns_away_from_a_close_corner():
+    nav = Navigator(ConstPolicy([0.8, 0.8]), [[2, 0]], speed_scale=1.0)
+    l, r = nav.step(Telemetry.parse(json.dumps({**SAMPLE, "side": [120, -1]})), Odometry())
+    assert l + r < 1.6 and l > r                      # slower, and turning right, away from the left post
+    l, r = nav.step(Telemetry.parse(json.dumps({**SAMPLE, "side": [-1, -1]})), Odometry())
+    assert (l, r) == (0.8, 0.8)                       # nothing near (or no corner sensors): untouched
+    old = Telemetry.parse(json.dumps(SAMPLE))         # older firmware sends no "side" at all
+    assert old.side == [-1, -1]
+    off = Navigator(ConstPolicy([0.8, 0.8]), [[2, 0]], speed_scale=1.0, side_slow_mm=0)
+    assert off.step(Telemetry.parse(json.dumps({**SAMPLE, "side": [120, -1]})), Odometry()) == (0.8, 0.8)
+
+
 def test_navigator_switches_to_sun_when_low():
     nav = Navigator(ConstPolicy([0.0, 0.0]), [[2, 0]])
     tel = Telemetry.parse(json.dumps({**SAMPLE, "low": 1, "bat_pct": 25}))

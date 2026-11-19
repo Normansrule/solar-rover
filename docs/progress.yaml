@@ -13,7 +13,7 @@ phases:
     tasks:
       - {task: "3D model of all 32 printed parts (OpenSCAD, 220 mm bed)", status: done}
       - {task: "Pin-by-pin wiring and diagrams, no custom PCB", status: done}
-      - {task: "Parts list with prices (about $221)", status: done}
+      - {task: "Parts list with prices (about $229)", status: done}
       - {task: "Collision check of every part and arm move (fit_check.py)", status: done}
 
   - name: Software

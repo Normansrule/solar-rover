@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/badge/license-MIT-53647a" alt="MIT license">
 </p>
 
-Solar Rover is a 3D-printed, four-wheel-drive robot car with a solar roof and a small crane arm on a turret, styled after the repair vehicle from Red Alert 2. You can drive it with a handheld remote, from your phone over WiFi or Bluetooth, or hand the wheel to a reinforcement learning (RL) agent running on a Raspberry Pi inside it. It's for hobbyists who own a 3D printer and want a robot that does a bit of everything (driving, picking things up, charging itself in the sun, learning to drive in a simulator) without designing a circuit board or spending a fortune: every part prints on a 220 mm bed and the electronics cost about $221.
+Solar Rover is a 3D-printed, four-wheel-drive robot car with a solar roof and a small crane arm on a turret, styled after the repair vehicle from Red Alert 2. You can drive it with a handheld remote, from your phone over WiFi or Bluetooth, or hand the wheel to a reinforcement learning (RL) agent running on a Raspberry Pi inside it. It's for hobbyists who own a 3D printer and want a robot that does a bit of everything (driving, picking things up, charging itself in the sun, learning to drive in a simulator) without designing a circuit board or spending a fortune: every part prints on a 220 mm bed and the electronics cost about $229.
 
 **[Try the crane on the website](https://normansrule.github.io/solar-rover/docs/)**: it's the same arm, drawn to scale, and you can drag it around and pick up a ball.
 
@@ -78,7 +78,7 @@ Solar Rover is a 3D-printed, four-wheel-drive robot car with a solar roof and a 
 
 - [x] 3D model of all 32 printed parts (OpenSCAD, 220 mm bed)
 - [x] Pin-by-pin wiring and diagrams, no custom PCB
-- [x] Parts list with prices (about $221)
+- [x] Parts list with prices (about $229)
 - [x] Collision check of every part and arm move (fit_check.py)
 
 </details>
@@ -149,7 +149,7 @@ All commands are for Ubuntu or WSL (Windows Subsystem for Linux) and start from 
 
 | Step | What you do | Guide |
 |---|---|---|
-| Order parts | The modules, motors, servos, cells, panels and screws. About $221 for the car, $252 with the remote. | [bom.csv](docs/bom.csv), [modules.md](docs/modules.md) |
+| Order parts | The modules, motors, servos, cells, panels and screws. About $229 for the car, $259 with the remote. | [bom.csv](docs/bom.csv), [modules.md](docs/modules.md) |
 | Fit test | Print the wheel, encoder disc, motor clamp and roof post. Measure your parts against the **MEASURE** values in `hardware/scad/config.scad`, fix and re-export. | [assembly.md](docs/assembly.md#build-steps) |
 | Print | All 31 parts in PETG, tires in TPU. Set the heat-set inserts. | [assembly.md](docs/assembly.md#print-settings) |
 | Assemble | Chassis and motors, then power, then the ESP32 and Pi on the logic tray, then the turret, arm, nose and solar roof. Set every buck converter with a multimeter before you connect anything. | [assembly.md](docs/assembly.md#build-steps), [wiring.md](docs/wiring.md) |

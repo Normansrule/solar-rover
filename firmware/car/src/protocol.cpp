@@ -76,6 +76,12 @@ bool handle(Source src, const char* lineIn, String& reply) {
         control::stop(src);
     } else if (!strcasecmp(c, "H")) {
         control::heartbeat(src);
+    } else if (!strcasecmp(c, "ASSIST")) {                // ASSIST | ASSIST <ON|OFF>: obstacle assist for manual driving
+        if (argc >= 2 && src == Source::AGENT) reply = "ERR not from this link";
+        else if (argc >= 2 && !strcasecmp(argv[1], "ON")) control::setAssist(true);
+        else if (argc >= 2 && !strcasecmp(argv[1], "OFF")) control::setAssist(false);
+        else if (argc >= 2) reply = "ERR usage: ASSIST <ON|OFF>";
+        if (!reply.length()) reply = String("ASSIST ") + (control::assistOn() ? "on" : "off");
     } else if (!strcasecmp(c, "CL") && argc >= 2) {       // CL <0|1> closed-loop wheel speed
         drive::setClosedLoop(atoi(argv[1]) != 0);
     } else if (!strcasecmp(c, "LORA")) {                  // LORA | LORA REGION <US|EU> | LORA REKEY
@@ -110,7 +116,10 @@ bool handle(Source src, const char* lineIn, String& reply) {
         else if (gPower.critical) reply = "ERR battery";
         else if (!bringup::startWheels(src)) reply = "ERR test running";
     } else if (!strcasecmp(c, "INFO")) {
-        reply = String("solar-rover fw 0.1 mode=") + modeName(control::mode()) + " ip=" + settings::ipString();
+        reply = String("solar-rover fw 0.1 mode=") + modeName(control::mode()) + " ip=" + settings::ipString()
+              + " tof=" + (gSensors.tof_ok ? "ok" : "missing")
+              + " corners=" + (gSensors.side_ok[0] ? "ok" : "-") + "/" + (gSensors.side_ok[1] ? "ok" : "-")
+              + (gSensors.tof_mux ? " mux" : "");
     } else {
         reply = "ERR unknown";
         return false;
@@ -125,12 +134,12 @@ size_t telemetry(char* b, size_t len) {
         "\"bat_v\":%.2f,\"bat_pct\":%.0f,\"chg_ma\":%.0f,\"sol_v\":%.2f,\"sol_mw\":%.0f,"
         "\"temp_c\":%.1f,\"chg\":\"%s\",\"low\":%d,\"crit\":%d,"
         "\"enc\":[%ld,%ld,%ld,%ld],\"spd\":[%.0f,%.0f,%.0f,%.0f],"
-        "\"imu\":[%.3f,%.3f,%.3f,%.1f,%.1f,%.1f],\"tof\":%d,"
+        "\"imu\":[%.3f,%.3f,%.3f,%.1f,%.1f,%.1f],\"tof\":%d,\"side\":[%d,%d],\"ast\":%d,"
         "\"arm\":[%.1f,%.1f,%.1f,%.1f,%.0f],\"lr\":[%d,%d,%lu]}",
         (unsigned long)millis(), modeName(control::mode()), sourceName(control::driver()), control::manualOverrideActive(),
         p.batt_v, p.pct, p.charge_ma, p.solar_v, p.solar_mw, p.temp_c, p.charge_state, p.low, p.critical,
         d.enc[0], d.enc[1], d.enc[2], d.enc[3], d.speed_mm_s[0], d.speed_mm_s[1], d.speed_mm_s[2], d.speed_mm_s[3],
-        s.ax, s.ay, s.az, s.gx, s.gy, s.gz, s.tof_mm,
+        s.ax, s.ay, s.az, s.gx, s.gy, s.gz, s.tof_mm, s.side_mm[0], s.side_mm[1], d.assist,
         arm::angle(0), arm::angle(1), arm::angle(2), arm::angle(3), arm::angle(4),
         longrange::ok(), longrange::lastRssi(),
         (unsigned long)(longrange::lastFrameMs() ? min<uint32_t>(millis() - longrange::lastFrameMs(), 999999) : 999999));

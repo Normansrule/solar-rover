@@ -3,7 +3,34 @@
 #include <VL53L0X.h>
 
 namespace {
-VL53L0X tof;
+// index 0 = front, 1 = left corner, 2 = right corner
+VL53L0X tof[3];
+bool tofOk[3] = {false, false, false};
+constexpr uint8_t TOF_CH[3] = {TOF_CH_FRONT, TOF_CH_LEFT, TOF_CH_RIGHT};
+bool muxPresent = false;
+uint8_t muxSel = 0xFF;
+
+bool muxSelect(int i) {
+    if (!muxPresent) return true;
+    uint8_t want = 1u << TOF_CH[i];
+    if (muxSel == want) return true;
+    Wire.beginTransmission(ADDR_TCA9548A);
+    Wire.write(want);
+    bool ok = Wire.endTransmission() == 0;
+    muxSel = ok ? want : 0xFF;
+    return ok;
+}
+
+bool tofInit(int i) {
+    if (!muxSelect(i)) return false;
+    tof[i].setTimeout(30);
+    if (!tof[i].init()) return false;
+    tof[i].setMeasurementTimingBudget(33000);
+    tof[i].startContinuous(50);
+    return true;
+}
+
+int* tofOut(int i) { return i == 0 ? &gSensors.tof_mm : &gSensors.side_mm[i - 1]; }
 uint32_t lastImuMs = 0;
 float bias[3] = {0, 0, 0};
 
@@ -40,9 +67,12 @@ void begin() {
         }
         if (n) for (int k = 0; k < 3; k++) bias[k] = sum[k] / n;
     }
-    tof.setTimeout(30);
-    s.tof_ok = tof.init();
-    if (s.tof_ok) { tof.setMeasurementTimingBudget(33000); tof.startContinuous(50); }
+    Wire.beginTransmission(ADDR_TCA9548A);
+    muxPresent = Wire.endTransmission() == 0;
+    s.tof_mux = muxPresent;
+    for (int i = 0; i < (muxPresent ? 3 : 1); i++) tofOk[i] = tofInit(i);
+    s.tof_ok = tofOk[0];
+    s.side_ok[0] = tofOk[1]; s.side_ok[1] = tofOk[2];
 }
 
 void update() {
@@ -56,9 +86,16 @@ void update() {
             s.gx = v[4] / 131.0f - bias[0]; s.gy = v[5] / 131.0f - bias[1]; s.gz = v[6] / 131.0f - bias[2];
         }
     }
-    if (s.tof_ok && (tof.readReg(VL53L0X::RESULT_INTERRUPT_STATUS) & 0x07)) {
-        uint16_t mm = tof.readRangeContinuousMillimeters();
-        s.tof_mm = (tof.timeoutOccurred() || mm >= 2000) ? -1 : mm;
+    // one sensor per loop pass, round robin, so a pass never waits on all three
+    static int next = 0;
+    for (int n = 0; n < 3; n++) {
+        int i = next; next = (next + 1) % 3;
+        if (!tofOk[i]) continue;
+        if (muxSelect(i) && (tof[i].readReg(VL53L0X::RESULT_INTERRUPT_STATUS) & 0x07)) {
+            uint16_t mm = tof[i].readRangeContinuousMillimeters();
+            *tofOut(i) = (tof[i].timeoutOccurred() || mm >= 2000) ? -1 : mm;
+        }
+        break;
     }
 }
 

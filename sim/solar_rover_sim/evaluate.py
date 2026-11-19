@@ -2,8 +2,10 @@
 
 On the car the agent scales the policy's output by speed_scale and never
 drives forward when the time-of-flight sensor reads under stop_tof_mm
-(agent/solar_rover_agent/behaviours.py). train_es scores the bare policy;
-this scores both, on the same seeds, so the numbers match what to expect.
+(agent/solar_rover_agent/behaviours.py), and slows and turns away when a
+corner sensor sees something close (side_guard). train_es scores the bare
+policy; this scores it bare, on a car with only the front sensor
+("one_sensor") and as the car runs it ("on_car"), on the same seeds.
 
     python -m solar_rover_sim.evaluate ../agent/models/drive.npz
     python -m solar_rover_sim.evaluate old.npz new.npz --episodes 100
@@ -19,8 +21,9 @@ from .env import CarParams, SolarRoverEnv
 from .policy import MLPPolicy
 
 
-ON_CAR = dict(speed_scale=0.7, stop_tof=0.13)   # agent/config.yaml speed_scale, Navigator stop_tof_mm
-BARE = dict(speed_scale=1.0, stop_tof=0.0)
+ON_CAR = dict(speed_scale=0.7, stop_tof=0.13, side_slow=0.30)   # agent/config.yaml speed_scale, Navigator stop_tof_mm, side_slow_mm
+ONE_SENSOR = dict(ON_CAR, side_slow=0.0)                          # a car without the corner sensors
+BARE = dict(speed_scale=1.0, stop_tof=0.0, side_slow=0.0)
 
 
 def run(policy, task, episodes=50, seed0=50_000, params=None):
@@ -56,10 +59,11 @@ def main(argv=None):
         pol = MLPPolicy.load(path)
         res[path] = {
             "bare": run(pol, "goal", a.episodes, params=replace(base, **BARE)),
+            "one_sensor": run(pol, "goal", a.episodes, params=replace(base, **dict(ONE_SENSOR, speed_scale=a.speed_scale))),
             "on_car": run(pol, "goal", a.episodes, params=replace(base, **dict(ON_CAR, speed_scale=a.speed_scale))),
         }
         for k, v in res[path].items():
-            print(f"{path:40s} {k:7s} goal {v['success']:3d}/{a.episodes}  crashes {v['collisions']:3d}/{a.episodes}  "
+            print(f"{path:40s} {k:10s} goal {v['success']:3d}/{a.episodes}  crashes {v['collisions']:3d}/{a.episodes}  "
                   f"mean episode {v['mean_s']} s")
     return res
 
