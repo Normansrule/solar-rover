@@ -213,6 +213,18 @@ async function main() {
     car.sockets.at(-1).send('ok WIFI saved');
     await until(async () => (await text(page, '#reply')) === 'ok WIFI saved', 'the reply was not shown');
   });
+  await check('Check sensors sends TEST SENSORS and lists the results', async () => {
+    car.clear(); await page.click('#testSensors');
+    await until(() => car.lines().includes('TEST SENSORS'), 'no TEST SENSORS');
+    for (const l of ['TEST imu ok, level to 1 deg', 'TEST tof left FAIL left corner sensor missing: check its lead on mux channel 1',
+                     'TEST battery WARN 6.50 V: nearly empty, charge it', 'TEST done: 2 to fix']) car.sockets.at(-1).send(l);
+    await until(async () => (await page.locator('#testOut li').count()) === 4, 'the results list did not fill');
+    expect((await page.locator('#testOut li.fail').count()) === 1, 'the FAIL line is not marked');
+    expect((await page.locator('#testOut li.warn').count()) === 2, 'the WARN and summary lines are not marked');
+    car.clear(); await page.click('#testWheels');
+    await until(() => car.lines().includes('TEST WHEELS'), 'no TEST WHEELS');
+    expect((await page.locator('#testOut li').count()) === 0, 'a new check did not clear the old results');
+  });
   await check('Save and restart refuses spaces, then sends WIFI and RESTART', async () => {
     await page.fill('#ssid', 'my net'); await page.fill('#pass', 'pw'); car.clear(); await page.click('#saveWifi');
     expect((await text(page, '#reply')).includes("can't contain spaces"), 'no warning about spaces');

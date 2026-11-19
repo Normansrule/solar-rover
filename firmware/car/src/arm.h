@@ -4,6 +4,7 @@
 
 namespace arm {
 bool begin();                         // false if the PCA9685 is not found
+bool found();                         // what begin() returned
 void setTarget(int joint, float deg); // logical degrees (grip: 0-100 %)
 void jog(int joint, float dps);       // run a joint at dps until the next jog/timeout
 bool pose(const char* name);          // park | ready | pick | carry

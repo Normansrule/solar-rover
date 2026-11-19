@@ -56,6 +56,9 @@ button:active{transform:scale(.97);background:var(--raised-2)}
 button.primary{background:var(--hazard);color:var(--on-hazard)}
 .row{display:flex;gap:var(--s2)}
 .row>*{flex:1}
+.tests{list-style:none;margin:var(--s2) 0 0;padding:0;font-size:14px;line-height:1.4}
+.tests li{padding:6px 0;border-top:1px solid var(--raised)}
+.tests li.warn{color:var(--warn)}.tests li.fail{color:var(--bad)}
 .assist{display:flex;align-items:center;gap:var(--s3);margin-top:var(--s3)}
 .assist button{flex:none}.assist .hint{margin:0}
 .assist .hint.on{color:var(--warn)}
@@ -196,6 +199,9 @@ input::placeholder{color:var(--ink-2);opacity:1}
       </div>
       <div class="row" style="margin-top:var(--s2)"><button id="saveWifi">Save and restart</button><button id="pair">Pair a remote</button></div>
       <p class="hint" id="reply" role="status" aria-live="polite"></p>
+      <span class="label">After building or rewiring</span>
+      <div class="row"><button id="testSensors">Check sensors</button><button id="testWheels">Check wheels</button></div>
+      <ul class="tests" id="testOut" aria-live="polite" hidden></ul>
     </section>
 </main>
 <script src="crane.js"></script>
@@ -262,6 +268,7 @@ input::placeholder{color:var(--ink-2);opacity:1}
   // ---------- telemetry ----------
   let craneBusy = 0;
   function onLine(line) {
+    if (line && line.startsWith('TEST ')) { testLine(line.slice(5)); return; }
     if (!line || line[0] !== '{') { $('reply').textContent = line; return; }
     let t; try { t = JSON.parse(line); } catch (e) { return; }
     if (!live) { live = true; document.body.classList.add('live'); $('waiting').hidden = true; }
@@ -379,6 +386,20 @@ input::placeholder{color:var(--ink-2);opacity:1}
       : assistOn ? 'Slows the car before it reaches something ahead.' : 'Off: nothing slows the car near obstacles.';
   }
   $('assist').onclick = () => { send(assistOn ? 'ASSIST OFF' : 'ASSIST ON'); showAssist(assistOn ? 0 : 1); };
+
+  // ---------- bring-up checks (TEST SENSORS / TEST WHEELS, docs/assembly.md step 8) ----------
+  function testLine(t) {
+    const out = $('testOut'); out.hidden = false;
+    const li = document.createElement('li');
+    li.textContent = t;
+    const w = ' ' + t + ' ';
+    if (w.includes(' FAIL ')) li.className = 'fail';
+    else if (w.includes(' WARN ') || / to fix /.test(w) || (t.startsWith('wheel ') && !/^wheel \w+ ok /.test(t))) li.className = 'warn';
+    out.appendChild(li);
+  }
+  const startTest = what => { $('testOut').replaceChildren(); send('TEST ' + what); };
+  $('testSensors').onclick = () => startTest('SENSORS');
+  $('testWheels').onclick = () => startTest('WHEELS');
 
   // ---------- buttons ----------
   $('stop').onclick = () => send('S');

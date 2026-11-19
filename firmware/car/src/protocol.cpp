@@ -115,6 +115,9 @@ bool handle(Source src, const char* lineIn, String& reply) {
         if (src == Source::REMOTE || src == Source::AGENT) reply = "ERR not from this link";
         else if (gPower.critical) reply = "ERR battery";
         else if (!bringup::startWheels(src)) reply = "ERR test running";
+    } else if (!strcasecmp(c, "TEST") && argc >= 2 && !strcasecmp(argv[1], "SENSORS")) {  // bring-up sensor check
+        if (src == Source::REMOTE || src == Source::AGENT) reply = "ERR not from this link";
+        else if (!bringup::startSensors(src)) reply = "ERR test running";
     } else if (!strcasecmp(c, "INFO")) {
         reply = String("solar-rover fw 0.1 mode=") + modeName(control::mode()) + " ip=" + settings::ipString()
               + " tof=" + (gSensors.tof_ok ? "ok" : "missing")
