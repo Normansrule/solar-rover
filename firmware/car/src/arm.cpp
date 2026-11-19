@@ -32,6 +32,8 @@ void write(int j) {
 
 namespace arm {
 
+bool found() { return ok; }
+
 bool begin() {
     Wire.beginTransmission(ADDR_PCA9685);
     ok = Wire.endTransmission() == 0;

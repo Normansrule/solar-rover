@@ -14,6 +14,7 @@ struct PowerState {
     float batt_v = 0, charge_ma = 0, solar_v = 0, solar_mw = 0, temp_c = 25;
     float pct = 0;
     bool  low = false, critical = false, ntc_fault = false;
+    bool  batt_ok = false, solar_ok = false;   // the two INA219s answered at boot
     bool  charger_on = false;
     const char* charge_state = "boot";   // off_temp | full | solar | wall | idle | fault
 };

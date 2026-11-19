@@ -81,6 +81,7 @@ void begin() {
     solarOk = present(ADDR_INA_SOLAR) && inaSolar.begin();
     if (battOk) inaBatt.setCalibration_32V_2A();
     if (solarOk) inaSolar.setCalibration_32V_1A();
+    gPower.batt_ok = battOk; gPower.solar_ok = solarOk;
 }
 
 void update() {
