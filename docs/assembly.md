@@ -10,7 +10,7 @@
 
 | STL | Qty | Orientation | Notes |
 |---|---|---|---|
-| `fit_test` | 1 | flat | print first (build step 0); about 20 g |
+| `fit_test` | 1 | flat | print first (build step 0); about 35 g, 3.5 h |
 | `deck_front`, `deck_rear` | 1 each | flip top face down | 5 walls. Ribs and bosses face up. |
 | `motor_clamp_a` | 2 | as exported | front-left + rear-right; no supports |
 | `motor_clamp_b` | 2 | as exported | front-right + rear-left |
@@ -38,7 +38,7 @@
 | `module_cradle_e220` | 1 | as exported (floor down) | snap-in holder for the LoRa radio, hangs under the rear roof tray (`cradle_e220`) |
 | `remote_case_top`, `remote_case_bottom` | 1 each | outer face down | |
 
-**Total:** about 850 g of PETG and 100 g of TPU.
+**Total:** about 1050 g of PETG and 65 g of TPU, roughly 100 hours of printing. [print-plan.md](print-plan.md) has the grams and hours for every part and packs them onto plates that each finish overnight (`python3 tools/print_plan.py` regenerates it after a change).
 
 ## Heat-set inserts
 
