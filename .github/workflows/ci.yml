@@ -75,6 +75,8 @@ jobs:
           sudo apt-get update && sudo apt-get install -y openscad
           python3 -m pip install trimesh==5.1.1 manifold3d==3.5.4
           python3 tools/fit_check.py --paths
+      - name: Print plan matches the STLs, the print table and the BOM
+        run: python3 tools/print_plan.py --check
       - name: Shell scripts parse
         run: for f in tools/*.sh agent/setup_pi.sh; do bash -n "$f"; done
 

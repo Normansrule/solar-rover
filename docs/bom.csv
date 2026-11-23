@@ -37,8 +37,8 @@ Hardware,M3 brass heat-set inserts (M3 x 5 OD x 4 L),100,0.04,4.00,About 69 used
 Hardware,M2.5 brass heat-set inserts,10,0.05,0.50,Pi + PCA9685
 Hardware,"M3 socket-head screws: 8 mm x45, 10 mm x35, 12 mm x2, 16 mm x8, 30 mm x4, 45 mm x12, 60 mm x1",1,8.00,8.00,"Plus 20 M3 nuts (9 nyloc), 20 washers; full list in docs/assembly.md"
 Hardware,M2.5 x 6 screws x8 + M2 x 6/10 screws x20,1,3.00,3.00,Servos ship with their own horn screws and M2 self-tappers
-Print,PETG filament,1,20.00,20.00,~800 g; PETG because the roof sits in the sun
-Print,TPU 95A filament (tires),0.1,25.00,2.50,~100 g
+Print,PETG filament,1.1,20.00,22.00,~1050 g (docs/print-plan.md): buy two 1 kg spools; PETG because the roof sits in the sun
+Print,TPU 95A filament (tires),0.1,25.00,2.50,~65 g for four tires
 Wiring,Silicone wire 18 AWG + 24 AWG + Dupont/JST connectors,1,8.00,8.00,
 Wiring,Dupont jumper wires female-female 20 cm (40-pack),1,3.00,3.00,Module-to-module logic wiring
 Wiring,Double-sided foam tape + small zip ties,1,2.00,2.00,For modules without mounting holes
@@ -50,5 +50,5 @@ Remote,TP4056 USB-C charger board (with protection) + MT3608 boost + slide switc
 Remote,0-25 V voltage sensor module (5:1 divider),1,0.50,0.50,Remote battery level
 Remote,Ebyte E220-900T22D LoRa module + 868/915 MHz SMA swivel antenna,1,10.00,10.00,Same radio as the car
 Remote,SMA female bulkhead to SMA male pigtail (RG316 10 cm),1,2.00,2.00,Antenna jack in the case wall
-TOTAL (car),,,,~229,~$200 if the agent runs on a PC instead of the onboard Pi + camera
-TOTAL (with remote),,,,~259,
+TOTAL (car),,,,~231,~$200 if the agent runs on a PC instead of the onboard Pi + camera
+TOTAL (with remote),,,,~261,
